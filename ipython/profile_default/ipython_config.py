@@ -31,7 +31,8 @@
 ## lines of code to run at IPython startup.
 c.InteractiveShellApp.exec_lines = ['%matplotlib tk',
 'import numpy as np', 'import matplotlib.pyplot as plt',
-'import pandas as pd', 'import os', 'import sys']
+'import pandas as pd', 'import os', 'import sys',
+'import geopandas as gpd']
 
 ## A list of dotted module names of IPython extensions to load.
 #c.InteractiveShellApp.extensions = []
@@ -167,7 +168,7 @@ c.InteractiveShell.automagic = True
 c.InteractiveShell.banner1 = 'Welcome to the CCB iPython shell!'
 
 ## The part of the banner to be printed after the profile
-c.InteractiveShell.banner2 = ''
+c.InteractiveShell.banner2 = 'Trust the process. --Sam Hinkie'
 
 ## Set the size of the output cache.  The default is 1000, you can change it
 #  permanently in your config file.  Setting it to 0 completely disables the
