@@ -18,6 +18,7 @@ From: ubuntu:17.10
     # set the path to the ipython configuration
     #  make sure you have a $CCB environment variable on your local machine to your ccb directory
     export IPYTHONDIR=$CCB/ipython
+    export PATH=$CCB/bin:$PATH
 
 %post
     # install packages via apt
@@ -76,7 +77,7 @@ From: ubuntu:17.10
         earthengine-api
         
     # get some fresh matplotlib
-    pip install --upgrade matplotlib oauth2client
+    pip install --upgrade matplotlib oauth2client setuptools ipython
 
     # since pyprosail is broken on default, move some files around
     mv /usr/local/lib/python2.7/dist-packages/PyPROSAIL/_prosail_model.so /usr/local/lib/python2.7/dist-packages/pyprosail/
