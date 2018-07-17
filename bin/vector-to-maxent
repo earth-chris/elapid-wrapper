@@ -1,0 +1,53 @@
+#! /usr/bin/env python
+import sys
+import argparse
+import numpy as np
+import pandas as pd
+import geopandas as gpd
+
+
+############################
+# set the command line argument parser
+parser = argparse.ArgumentParser(description='Converts vector data to maxent format csv data')
+
+# set input/output file arguments
+parser.add_argument('-i', '--input', help='path to vector file', type=str, required=True)
+parser.add_argument('-o', '--output', help='path to the output csv', type=str, required=True)
+
+# set the attribute field to identify the species
+parser.add_argument('-f', '--field', help='the attribute field to set as the species', type=str,
+                    default='species')
+                    
+# allow user to set an attribute field as the x/y data
+parser.add_argument('--xfield', help='use a certain attribute field as the Y data', default=None)
+parser.add_argument('--yfield', help='use a certain attribute field as the Y data', default=None)
+
+# now various flags and arguments
+parser.add_argument('-e', '--epsg', help='the output projection', default=None)
+
+
+############################
+# set a couple of useful functions
+def getXY(pt):
+    return (pt.x, pt.y)
+    
+
+def read_input(path):
+    try:
+        gpd.read_file(path)
+        geo = True
+    except:
+        try:
+            pd.read_csv(path)
+            geo = False
+        except:
+            print("[ ERROR! ]: Unable to read file: {}".format(path))
+            print("[ ERROR! ]: Please ensure it is a vector file or a CSV")
+            sys.exit(1)
+
+############################
+# read the input file
+
+
+centroidseries = zones['geometry'].centroid
+x,y = [list(t) for t in zip(*map(getXY, centroidseries))]
