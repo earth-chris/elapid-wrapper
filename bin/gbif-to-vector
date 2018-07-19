@@ -34,9 +34,9 @@ parser.add_argument('-o', '--output', help='path to the output vector', type=str
 
 # now various flags and arguments
 parser.add_argument('-e', '--epsg', help='the output projection (in gdal-readable format)',
-                    default='3410')
-parser.add_argument('-t', '--taxonomic_resolution', help='the taxonomic group that must have data to be included',
-                    default='genus', choices=taxa, metavar='')
+                    default='4326')
+parser.add_argument('-t', '--taxonomic_level', help='the taxonomic group that must have data to be included',
+                    default='genus', choices=taxa, metavar='taxonomic_level')
 parser.add_argument('-p', '--precision', help='the minimum allowable spatial precision (in meters)', default=None)
 parser.add_argument('-y', '--min_year', help='the earliest year to grab data from', default=2000)
 
@@ -91,7 +91,7 @@ observation_type = ['HUMAN_OBSERVATION',
                    'MATERIAL_SAMPLE', 
                    'MACHINE_OBSERVATION']
                    
-valid_by = [args.taxonomic_resolution, 'decimallatitude','decimallongitude']
+valid_by = [args.taxonomic_level, 'decimallatitude','decimallongitude']
 duplicate_by = ['species', 'genus', 'decimallatitude','decimallongitude']
 
 # set the columns worth keeping
@@ -100,7 +100,7 @@ final_columns = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'spec
 
 ############################
 # start reading the data and processing
-
+prtin("[ STATUS ]: Starting gbif-to-vector")
 print("[ STATUS ]: Reading input file: {}".format(args.input))
 
 # read the data into memory and subset to just the relevant columns
