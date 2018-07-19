@@ -33,6 +33,7 @@ From: ubuntu:17.10
     	python-pip \
     	python-tk \
     	build-essential \
+    	software-properties-common \
     	libfontconfig1 \
     	mesa-common-dev \
     	python-numpy \
@@ -49,6 +50,11 @@ From: ubuntu:17.10
     	git \
     	vim \
     	openssl
+    	
+    # install the orfeo toolbox packages
+    apt-add-repository -y ppa:ubuntugis/ubuntugis-unstable 
+    apt-get -y update
+    apt-get install -y otb-bin otb-bin-qt python-otb
 
     # clean up the apt files
     apt-get clean 
