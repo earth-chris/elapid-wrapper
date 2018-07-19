@@ -168,7 +168,7 @@ c.InteractiveShell.automagic = True
 c.InteractiveShell.banner1 = 'Welcome to the CCB iPython shell!'
 
 ## The part of the banner to be printed after the profile
-c.InteractiveShell.banner2 = 'Trust the process. --Sam Hinkie'
+c.InteractiveShell.banner2 = '  trust the process. --Sam Hinkie'
 
 ## Set the size of the output cache.  The default is 1000, you can change it
 #  permanently in your config file.  Setting it to 0 completely disables the
