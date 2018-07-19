@@ -1,13 +1,26 @@
 # CCB
 This repo contains a set of general functions for performing everyday ccb'ing
 
-Maintained by [Christopher Anderson](mailto:cbanders@stanford.edu) and (maybe?) [Jeff Smith](mailto:jrsmith7@stanford.edu)
+Maintained by [Christopher Anderson](mailto:cbanders@stanford.edu) and [Jeff Smith](mailto:jrsmith7@stanford.edu)
 
 ### building the singularity container
 Build the ccb singularity container using the `ccb-singularity.build` script.
 
 ```
-sudo singularity build ccb ccb-singularity.build
+# clone the latest version of the repo
+git clone https://github.com/stanford-ccb/ccb.git
+cd ccb/
+
+# add the path to this repo as an environment variable
+export CCB=$PWD
+echo 'export CCB=$PWD' >> ~/.bashrc
+
+# then build the singularity container into the bin directory
+sudo singularity build bin/ccb ccb-singularity.build
+
+# and add ccb/bin to your local path so you can easily access the container
+export PATH=$CCB/bin:$PATH
+echo 'export PATH=$CCB/bin:$PATH' >> ~/.bashrc
 ```
 
-You can add the path to this repo as an environment variable `CCB`
+You can add then access the binary commands though the singularity container by typing e.g. `ccb gbif-to-vector -h`. You could also access the python module through e.g. `ccb ipython` then `import ccb`.
