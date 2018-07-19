@@ -6,25 +6,154 @@ from psutil import virtual_memory as _vm
 
 # get info on the cpu for setting memory/thread limits
 _ncpu = _mp.cpu_count()
-_mems = _vm.virtual_memory()
-_memb = _mems.total
+_mems = _vm().total / (1024 * 1024)
 
 
 class maxent:
-    def __init__(self, samples=None, layers=None, outdir=None, projection=None):
+    def __init__(self, samples=None, env_layers=None, model_dir=None, predict_layers=None,
+                 bias_file=None, test_samples=None, tau=0.5, n_test_points=0, n_background=10000,
+                 n_replicates=1, replicate_type='bootstrap', features=None, write_grids=False,
+                 logfile=None, cache=True, n_threads=_ncpu-1, mem=_mems/2):
         """
         """
-        # set up a bunch of the parameters for running maxent from the command line
         
-        # boolean for creating graphs showing predicted relative probabilities
-        self.response_curves = response_curves
+        # assign the passed values to a parameters dictionary
+        self.parameters_ = {
+            'samples': samples,
+            'model_dir': model_dir,
+            'env_layers': env_layers,
+            'predict_layers': predict_layers,
+            'bias_file': bias_file,
+            'test_samples': test_samples,
+            'n_test_points': n_test_points,
+            'n_background': n_background,
+            'n_replicates': n_replicates,
+            'replicate_type': replicate_type,
+            'features': features,
+            'write_grids': write_grids,
+            'logfile': logfile,
+            'cache': cache,
+            'tau': tau,
+            # and set a bunch of misc parameters that are usually too dumb to try and set
+            'response_curves': False,
+            'pictures': False,
+            'jackknife': False,
+            'output_format': 'logistic',
+            'output_type': 'bil',
+            'random_seed': False,
+            'log_scale': True,
+            'warnings': False,
+            'tooltips': False,
+            'ask_overwrite': False,
+            'skip_if_exists': False,
+            'remove_deuplicates': True,
+            'write_clampgrid': True,
+            'write_mess': True,
+            'beta_multiplier': 1.0,
+            'per_species_results': True,
+            'write_background_predictions': True,
+            'response_curve_exponent': False,
+            'add_samples_to_background': False,
+            'add_all_samples_to_background': False,
+            'write_plot_data': False,
+            'fade_by_clamping': False,
+            'extrapolate': True,
+            'visible': False,
+            'auto_feature': False,
+            'do_clamp': False,
+            'plots': False,
+            'append_to_results_file': False,
+            'maximum_iterations': 500,
+            'convergence_threshold': 1e-5,
+            'adjust_sample_radius': 0,
+            'n_threads': _ncpu-1,
+            'min_samples_threshold_product': 80,
+            'min_samples_quadratic': 10,
+            'min_samples_hinge': 15,
+            'beta_threshold': -1.,
+            'beta_categorical': -1.,
+            'beta_lqp': -1.,
+            'beta_hinge': -1.,
+            'verbose': True,
+            'allow_partial_data': False,
+            'nodata': -9999,
+            'prefixes': True
+            }
         
-        # boolean for creaing output pictures of predicted spatial distributions
-        self.pictures = pictures
+        # set a dummy variable to state this object has not yet been initialized 
+        #  (i.e., the sample file parsed for species)
+        self.initialized = False
         
-        # boolean to measure variable importance
-        self.jackknife
+    def update_parameters(self, **kwargs):
+        """
+        """
+        keys = kwargs.keys()
+        for param in keys:
+            self.parameters_[param] = kwargs[param]
+            
+    def list_parameters(self):
+        """
+        """
+        keys = self.parameters_.keys()
+        keys.sort()
+        return keys
         
+    def initialize(self, **kwargs):
+        """
+        """
+        # update the parameters dictionary to 
+        
+        # check that the bare minimum parameters have been set
+        if self.parameters_['samples'] is None:
+            print("[ ERROR! ]: no sample file has been set. Unable to initialize.")
+            return -1
+        
+        if self.parameters_['env_layers'] is None:
+            print("[ ERROR! ]: no layers have been set. Unable to initialize.")
+            return -1
+    
+    def set_layers(self, directory, layers=None):
+        """
+        """
+        
+    def build_string(self):
+        """
+        """
+        
+        # set options for the features to use
+        features_types = ['linear', 'quadratic', 'product', 'threshold', 'hinge', 'auto']
+        features_default = ['hinge']
+        if features in features_types:
+            self.features = features
+        else:
+            print("[ ERROR! ]: incorrect features specified: {}".format(', '.join(features)))
+            print("[ ERROR! ]: must be one of: {}".format(', '.join(features_types)))
+            print("[ ERROR! ]: using default: {}".format(', '.join(features_default)))
+            
+        # set how replicates are handled
+        replicate_types = ['crossvalidate', 'bootstrap', 'subsample']
+        replicate_types_default = 'crossvalidate'
+        if replicate_type.lower() in replicate_types:
+            self.replicate_type = replicate_type
+        else:
+            print("[ ERROR! ]: incorrect replicate type specified: {}".format(replicate_type))
+            print("[ ERROR! ]: must be one of: {}".format(', '.join(replicate_types)))
+            print("[ ERROR! ]: using default: {}".format(replicate_types_default))
+            self.replicate_type = replicate_types_default
+            
+        # set test percentage to an integer if a float is passed
+        test_pct_default = 30
+        if type(test_pct) is float:
+            self.test_pct = int(100 * test_pct)
+        else:
+            try:
+                self.test_pct = int(test_pct)
+            except:
+                print("[ ERROR! ]: incorrect test percent specified: {}".format(test_pct))
+                print("[ ERROR! ]: must be an integer between 0-100")
+                print("[ ERROR! ]: using default: {}".format(test_pct_default))
+                self.test_pct = test_pct_default
+
         # set the format for output data reporting
         formats = ['cloglog', 'logistic', 'cumulative', 'raw']
         formats_default = 'logistic'
@@ -46,130 +175,8 @@ class maxent:
             print("[ ERROR! ]: must be one of: {}".format(', '.join(types)))
             print("[ ERROR! ]: using default: {}".format(types_default))
             self.outtype = types_default
-            
-        # set the output directory
-        self.outdir = outdir
         
-        # set the directories or files for projection
-        self.projection = projection
-        
-        # set the sample file
-        self.samples = samples
-        
-        # boolean for log-scaling output pictures
-        self.logscale = logscale
-        
-        # booleans for displaying warnings/tooltips
-        self.warnings = warnings
-        self.tooltips = tooltips
-        
-        # booleans for overwriting/skipping existing files
-        self.overwrite = overwrite
-        self.skip_exists = skip_exists
-        
-        # boolean to remove duplicate data points in the same grid cell
-        self.remove_duplicates = remove_duplicates
-        
-        # booleans to write certain outputs
-        self.write_clamp_grid = write_clamp_grid
-        self.write_mess = write_mess
-        self.write_plot = write_plot
-        self.write_grids = write_grids
-        self.write_plots = write_plots
-        
-        # parameters for sampling test data
-        self.test_samples = test_sample_file
-        
-        # set test percentage to an integer if a float is passed
-        test_pct_default = 30
-        if type(test_pct) is float:
-            self.test_pct = int(100 * test_pct)
-        else:
-            try:
-                self.test_pct = int(test_pct)
-            except:
-                print("[ ERROR! ]: incorrect test percent specified: {}".format(test_pct))
-                print("[ ERROR! ]: must be an integer between 0-100")
-                print("[ ERROR! ]: using default: {}".format(test_pct_default))
-                self.test_pct = test_pct_default
-                
-        # set the beta multiplier
-        self.beta_multiplier = beta_multiplier
-        
-        # the number of background points
-        self.n_background = n_background
-        
-        # set replicate parameters
-        self.n_replicates = n_replicates
-        
-        # sample bias file (should be raster with 0 < values < 100)
-        self.bias_file = bias_file
-        
-        # set how replicates are handled
-        replicate_types = ['crossvalidate', 'bootstrap', 'subsample']
-        replicate_types_default = 'crossvalidate'
-        if replicate_type.lower() in replicate_types:
-            self.replicate_type = replicate_type
-        else:
-            print("[ ERROR! ]: incorrect replicate type specified: {}".format(replicate_type))
-            print("[ ERROR! ]: must be one of: {}".format(', '.join(replicate_types)))
-            print("[ ERROR! ]: using default: {}".format(replicate_types_default))
-            self.replicate_type = replicate_types_default
-            
-        # booleans for writing additional output files
-        self.per_species_results = per_species_results
-        self.write_background = write_background
-        
-        # set options for the features to use
-        features_types = ['linear', 'quadratic', 'product', 'threshold', 'hinge', 'auto']
-        features_default = ['hinge']
-        if features in features_types:
-            self.features = features
-        else:
-            print("[ ERROR! ]: incorrect features specified: {}".format(', '.join(features)))
-            print("[ ERROR! ]: must be one of: {}".format(', '.join(features_types)))
-            print("[ ERROR! ]: using default: {}".format(', '.join(features_default)))
-            
-        # set options for adding background samples
-        self.add_samples_background = add_samples_background
-        self.add_all_background = add_all_background
-        
-        # set clamping options
-        self.fade_by_clamping = fade_by_clamping
-        self.clamp = clamp
-        
-        # enable extrapolation to novel conditions
-        self.extrapolate = self.extrapolate
-        
-        # set a dummy variable to state this object has not yet been initialized 
-        #  (i.e., the sample file parsed for species)
-        self.initialized = False
-        
-        # finally, set the memory and threads for running maxent
-        self.memory = memory
-        self.threads = threads
-        
-    def initialize(self):
-        """
-        """
-        # check that the bare minimum data have been set
-        if self.samples is None:
-            print("[ ERROR! ]: no sample file has been set. Unable to initialize.")
-            return -1
-        
-        if self.layers is None:
-            print("[ ERROR! ]: no layers have been set. Unable to initialize.")
-            return -1
-    
-    def set_layers(self, directory, layers=None):
-        """
-        """
-        
-    def build_string(self):
-        """
-        """
-        
-    def run(self):
+    def fit(self):
         """
         """
         # check that the object has been initialized to check on
