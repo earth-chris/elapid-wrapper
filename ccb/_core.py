@@ -96,7 +96,7 @@ class maxent:
     def __init__(self, samples=None, env_layers=None, model_dir=None, predict_layers=None,
                  bias_file=None, test_samples=None, tau=0.5, pct_test_points=0, n_background=10000,
                  n_replicates=1, replicate_type='bootstrap', features=['hinge'], write_grids=False,
-                 logfile=None, cache=True, n_threads=_ncpu-1, mem=_mems/2):
+                 logfile='maxent.log', cache=True, n_threads=_ncpu-1, mem=_mems/4):
         """
         """
         
@@ -135,9 +135,9 @@ class maxent:
             'tooltips': False,
             'ask_overwrite': False,
             'skip_if_exists': False,
-            'remove_deuplicates': True,
-            'write_clampgrid': True,
-            'write_mess': True,
+            'remove_duplicates': True,
+            'write_clamp_grid': False,
+            'write_mess': False,
             'beta_multiplier': 1.0,
             'per_species_results': True,
             'write_background_predictions': True,
@@ -208,14 +208,6 @@ class maxent:
         flag = True
         
         # check that the bare minimum parameters have been set
-        if self.parameters_['samples'] is None:
-            prnt.error("no sample file has been set.")
-            flag = False
-        
-        if self.parameters_['env_layers'] is None:
-            prnt.error("no environmental layers have been set.")
-            flag = False
-            
         # check the input/output paths exist
         if not test_file(self.parameters_['samples'], 'samples file'):
             flag = False
@@ -245,8 +237,8 @@ class maxent:
         for feature in self.parameters_['features']:
             if feature.lower() not in features_types:
                 prnt.error("incorrect feature specified: {}".format(', '.join(feature)))
-                prnt.error("must be one of: {}".format(', '.join(features_types)))
-                prnt.error("using default: {}".format(', '.join(features_default)))
+                prnt.error("  must be one of: {}".format(', '.join(features_types)))
+                prnt.error("  using default: {}".format(', '.join(features_default)))
                 continue
             
         # set how replicates are handled
@@ -254,21 +246,19 @@ class maxent:
         replicate_types_default = 'crossvalidate'
         if self.parameters_['replicate_type'].lower() not in replicate_types:
             prnt.error("incorrect replicate type specified: {}".format(replicate_type))
-            prnt.error("must be one of: {}".format(', '.join(replicate_types)))
-            prnt.error("using default: {}".format(replicate_types_default))
+            prnt.error("  must be one of: {}".format(', '.join(replicate_types)))
+            prnt.error("  using default: {}".format(replicate_types_default))
             self.parameters_['replicate_type'] = replicate_types_default
             
         # set test percentage to an integer if a float is passed
-        test_pct_default = 30
+        test_pct_default = 25
         if type(self.parameters_['pct_test_points']) is float:
             self.parameters_['pct_test_points'] = int(100 * self.parameters_['pct_test_points'])
         else:
-            try:
-                self.parameters_['pct_test_points'] = int(test_pct)
-            except:
+            if type(self.parameters_['pct_test_points']) is not int:
                 prnt.error("incorrect test percent specified: {}".format(self.parameters_['pct_test_points']))
-                prnt.error("must be an integer between 0-100")
-                prnt.error("using default: {}".format(test_pct_default))
+                prnt.error("  must be an integer between 0-100")
+                prnt.error("  using default: {}".format(test_pct_default))
                 self.parameters_['pct_test_points'] = test_pct_default
 
         # set the format for output data reporting
@@ -276,8 +266,8 @@ class maxent:
         formats_default = 'logistic'
         if self.parameters_['output_format'].lower() not in formats:
             prnt.error("incorrect output format specified: {}".format(self.parameters_['output_format']))
-            prnt.error("must be one of: {}".format(', '.join(formats)))
-            prnt.error("using default: {}".format(formats_default))
+            prnt.error("  must be one of: {}".format(', '.join(formats)))
+            prnt.error("  using default: {}".format(formats_default))
             self.outformat = formats_default
             
         # set the output file type if writing output files
@@ -286,12 +276,13 @@ class maxent:
             types_default = 'bil'
             if outtype.lower() not in types:
                 prnt.error("incorrect output data type specified: {}".format(outtype))
-                prnt.error("must be one of: {}".format(', '.join(types)))
-                prnt.error("using default: {}".format(types_default))
+                prnt.error("  must be one of: {}".format(', '.join(types)))
+                prnt.error("  using default: {}".format(types_default))
                 self.outtype = types_default
             
         # then update with the flag - should be true if no problems arose
         self.initialized_ = flag
+        return flag
     
     def get_layers(self):
         """
@@ -309,12 +300,15 @@ class maxent:
         """
         """
         
-    def build_string(self):
+    def build_cmd(self):
         """
         """
         # first, check whether the options have been parsed through the initializer
         if not self.initialized_:
-            self.initialize()
+            init = self.initialize()
+            if not init:
+                prnt.error("unable to build cmd string. update your parameters then re-run object.initialize()")
+                return False
             
         # then get ready for just a stupid number of if statements
         s = []
@@ -372,15 +366,10 @@ class maxent:
             s.append(self.parameters_['pct_test_points'])
             
         # set background and replicate data
-        s.append('-MB')
-        s.append(self.parameters_['n_background'])
+        s.append('maximumbackground={}'.format(self.parameters_['n_background']))
         s.append('replicates={}'.format(self.parameters_['n_replicates']))
         s.append('replicatetype={}'.format(self.parameters_['replicate_type']))
         
-        # set the features to calculate
-        for feature in self.parameters_['features']:
-            s.append(feature)
-            
         # set options for writing grid data
         if self.parameters_['write_grids']:
             s.append('outputfiletype={}'.format(self.parameters_['output_type']))
@@ -388,14 +377,150 @@ class maxent:
             s.append('-x')
         s.append('outputformat={}'.format(self.parameters_['output_format']))
         
+        # set a bunch of boolean features based on their default on/off settings
+        #  (i.e., only turn on params that are default off, only turn off params that
+        #  are default on)
+        
+        if self.parameters_['response_curves']:
+            s.append('responsecurves')
+            
+        if not self.parameters_['pictures']:
+            s.append('nopictures')
+            
+            if not self.parameters_['log_scale']:
+                s.append('nologscale')
+            
+        if self.parameters_['jackknife']:
+            s.append('jackknife')
+            
+        if self.parameters_['random_seed']:
+            s.append('randomseed')
+            
+        if not self.parameters_['ask_overwrite']:
+            s.append('noaskoverwrite')
+        
+        if self.parameters_['skip_if_exists']:
+            s.append('-s')
+            
+        if not self.parameters_['remove_duplicates']:
+            s.append('noremoveduplicates')
+            
+        if not self.parameters_['write_clamp_grid']:
+            s.append('nowriteclampgrid')
+            
+        if not self.parameters_['write_mess']:
+            s.append('nowritemess')
+            
+        if self.parameters_['per_species_results']:
+            s.append('perspeciesresults')
+            
+        if self.parameters_['write_background_predictions']:
+            s.append('writebackgroundpredictions')
+            
+        if self.parameters_['response_curve_exponent']:
+            s.append('responsecurvesexponent')
+            
+        if not self.parameters_['add_samples_to_background']:
+            s.append('noaddsamplestobackground')
+        
+        if not self.parameters_['add_all_samples_to_background']:
+            s.append('addallsamplestobackground')
+            
+        if self.parameters_['fade_by_clamping']:
+            s.append('fadebyclamping')
+            
+        if not self.parameters_['extrapolate']:
+            s.append('noextrapolate')
+            
+        if not self.parameters_['do_clamp']:
+            s.append('nodoclamp')
+            
+        if not self.parameters_['plots']:
+            s.append('noplots')
+        else:
+            if self.parameters_['write_plot_data']:
+                s.append('writeplotdata')
+        
+        if self.parameters_['append_to_results_file']:
+            s.append('appendtoresultsfile')
+            
+        if self.parameters_['allow_partial_data']:
+            s.append('allowpartialdata')
+            
+        if not self.parameters_['prefixes']:
+            s.append('noprefixes')
+            
+        # set the features to calculate
+        if 'auto' in self.parameters_['features']:
+            s.append('autofeature')
+        else:
+            for feature in self.parameters_['features']:
+                s.append(feature)
+        
+        # set a bunch of feature-specific parameters
+        if not 'auto' in self.parameters_['features']:
+            
+            if not 'linear' in self.parameters_['features']:
+                s.append('nolinear')
+                
+            if 'quadratic' in self.parameters_['features']:
+                s.append('l2lqthreshold={}'.format(self.parameters_['min_samples_quadratic']))
+            else:
+                s.append('noquadratic')
+                
+            if 'product' in self.parameters_['features']:
+                s.append('l2qlptthreshold={}'.format(self.parameters_['min_samples_theshold_product']))
+                s.append('beta_lqp={}'.format(self.parameters_['beta_lqp']))
+            else:
+                s.append('noproduct')
+                
+            if 'threshold' in self.parameters_['features']:
+                s.append('l2qlptthreshold={}'.format(self.parameters_['min_samples_theshold_product']))
+                s.append('beta_threshold={}'.format(self.parameters_['beta_threshold']))
+            else:
+                s.append('nothreshold')
+                
+            if 'hinge' in self.parameters_['features']:
+                s.append('hingethreshold={}'.format(self.parameters_['min_samples_hinge']))
+                s.append('beta_hinge={}'.format(self.parameters_['beta_hinge']))
+            else:
+                s.append('nohinge')
+                
+        # set the beta scalar
+        s.append('-b')
+        s.append('{}'.format(self.parameters_['beta_multiplier']))
+        
+        # ok, finally done, set basic operational stuff and gtfo 
+        
+        # set the logfile
+        s.append('logfile={}'.format(self.parameters_['logfile']))
+        
+        # and turn off the GUI and warnings
+        s.append('nowarnings')
+        s.append('notooltips')
+        if not self.parameters_['visible']:
+            s.append('novisible')
+        
+        # return the concatenated string
+        return join.join(s)
+        
+        
     def fit(self):
         """
         """
         # check that the object has been initialized to check on
         if not self.initialized:
-            init = self.initalize()
+            init = self.initialize()
             if not init:
-                prnt.error("unable to run maxent. update your parameters then re-run {}.initialize()".format(self.__name__))
+                prnt.error("unable to run maxent. update your parameters then re-run object.initialize()")
                 return False
             
-        # fist build the string to create the 
+        # fist build the string to create the output command
+        cmd = self.build_cmd()
+        
+        # then run the dang thing
+        prnt.status('starting maxent run')
+        prnt.status('  samples: {}'.format(self.parameters_['samples']))
+        prnt.status('  outputs: {}'.format(self.parameters_['model_dir']))
+        
+        run(cmd)
