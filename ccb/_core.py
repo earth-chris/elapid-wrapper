@@ -174,7 +174,7 @@ class maxent:
         
         # set a dummy variable to state this object has not yet been initialized 
         #  (i.e., the sample file parsed for species)
-        self.initialized = False
+        self.initialized_ = False
         
     def set_parameters(self, **kwargs):
         """
@@ -183,7 +183,7 @@ class maxent:
         for param in keys:
             self.parameters_[param] = kwargs[param]
             
-    def get_parameters(self):
+    def get_parameter_keys(self):
         """
         """
         keys = self.parameters_.keys()
@@ -280,7 +280,7 @@ class maxent:
             prnt.error("using default: {}".format(formats_default))
             self.outformat = formats_default
             
-        # set the output file type
+        # set the output file type if writing output files
         if self.parameters_['write_grids']:
             types = ['asc', 'bil', 'grd', 'mxe']
             types_default = 'bil'
@@ -291,7 +291,7 @@ class maxent:
                 self.outtype = types_default
             
         # then update with the flag - should be true if no problems arose
-        self.initialized = flag
+        self.initialized_ = flag
     
     def get_layers(self):
         """
@@ -313,7 +313,7 @@ class maxent:
         """
         """
         # first, check whether the options have been parsed through the initializer
-        if not self.initialized:
+        if not self.initialized_:
             self.initialize()
             
         # then get ready for just a stupid number of if statements
@@ -374,7 +374,19 @@ class maxent:
         # set background and replicate data
         s.append('-MB')
         s.append(self.parameters_['n_background'])
-        s.append
+        s.append('replicates={}'.format(self.parameters_['n_replicates']))
+        s.append('replicatetype={}'.format(self.parameters_['replicate_type']))
+        
+        # set the features to calculate
+        for feature in self.parameters_['features']:
+            s.append(feature)
+            
+        # set options for writing grid data
+        if self.parameters_['write_grids']:
+            s.append('outputfiletype={}'.format(self.parameters_['output_type']))
+        else:
+            s.append('-x')
+        s.append('outputformat={}'.format(self.parameters_['output_format']))
         
     def fit(self):
         """
