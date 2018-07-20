@@ -1,6 +1,8 @@
 """Core functions and operations for the ccb library.
 """
+import os as _os
 import pandas as _pd
+import subprocess as _sp
 import multiprocessing as _mp
 from psutil import virtual_memory as _vm
 
@@ -9,10 +11,91 @@ _ncpu = _mp.cpu_count()
 _mems = _vm().total / (1024 * 1024)
 
 
+# set up a function to run external commands and return stdout/stderr
+def run(cmd, stderr=True):
+    """
+    """
+    # set whether or not stderr is included in return or just stdout
+    if stderr:
+        se = _sp.STDOUT
+    else:
+        se = None
+    
+    # run the command, and return stdout as a list
+    try:
+        proc = _sp.check_output(cmd, shell = True,
+          stderr = se)
+        return proc.split("\n")
+        
+    except _sp.CalledProcessError, e:
+        output = e.output.strip()
+        sp = output.find(":") + 2
+        prnt.error(output[sp:])
+        return e.output.strip().split("\n")
+
+
+# test whether a file exists
+def test_file(path, file_name='file'):
+    """
+    """
+    try:
+        if _os.path.isfile(path):
+            return True
+        else:
+            prnt.error('{} does not exist: {}'.format(file_name, path))
+            return False
+    except:
+        prnt.error('no {} path set'.format(file_name))
+        return False
+        
+
+# test whether a directory exists
+def test_dir(path, directory_name='directory'):
+    """
+    """
+    try:
+        if _os.path.isdir(path):
+            return True
+        else:
+            prnt.error('{} does not exist: {}'.format(directory_name, path))
+            return False
+    except:
+        prnt.error('no {} path set'.format(directory_name))
+        return False
+
+# set up a class to consistently print status/errors
+class prnt:
+    def __init__(self):
+        pass
+    
+    @staticmethod
+    def error(message):
+        if type(message) is str:
+            print("[ ERROR! ]: {}".format(message))
+        elif type(message) is list:
+            for item in list:
+                print("[ ERROR! ]: {}".format(item))
+        elif isinstance(message, _num.Number):
+            print("[ ERROR! ]: {}".format(message))
+        else:
+            pass
+        
+    @staticmethod
+    def status(message):
+        if type(message) is str:
+            print("[ STATUS ]: {}".format(message))
+        elif type(message) is list:
+            for item in list:
+                print("[ STATUS ]: {}".format(item))
+        elif isinstance(message, _num.Number):
+            print("[ STATUS ]: {}".format(message))
+        else:
+            pass
+
 class maxent:
     def __init__(self, samples=None, env_layers=None, model_dir=None, predict_layers=None,
-                 bias_file=None, test_samples=None, tau=0.5, n_test_points=0, n_background=10000,
-                 n_replicates=1, replicate_type='bootstrap', features=None, write_grids=False,
+                 bias_file=None, test_samples=None, tau=0.5, pct_test_points=0, n_background=10000,
+                 n_replicates=1, replicate_type='bootstrap', features=['hinge'], write_grids=False,
                  logfile=None, cache=True, n_threads=_ncpu-1, mem=_mems/2):
         """
         """
@@ -25,7 +108,7 @@ class maxent:
             'predict_layers': predict_layers,
             'bias_file': bias_file,
             'test_samples': test_samples,
-            'n_test_points': n_test_points,
+            'pct_test_points': pct_test_points,
             'n_background': n_background,
             'n_replicates': n_replicates,
             'replicate_type': replicate_type,
@@ -34,6 +117,12 @@ class maxent:
             'logfile': logfile,
             'cache': cache,
             'tau': tau,
+            # set a few properties for which species and layers to map
+            'species_list': None,
+            'all_species': True,
+            'layers_list': None,
+            'layers_original': None,
+            'all_layers': True,
             # and set a bunch of misc parameters that are usually too dumb to try and set
             'response_curves': False,
             'pictures': False,
@@ -67,6 +156,7 @@ class maxent:
             'convergence_threshold': 1e-5,
             'adjust_sample_radius': 0,
             'n_threads': _ncpu-1,
+            'mem': mem,
             'min_samples_threshold_product': 80,
             'min_samples_quadratic': 10,
             'min_samples_hinge': 15,
@@ -77,111 +167,223 @@ class maxent:
             'verbose': True,
             'allow_partial_data': False,
             'nodata': -9999,
-            'prefixes': True
+            'prefixes': True,
+            'path_maxent': 'maxent.jar',
+            'path_java': 'java'
             }
         
         # set a dummy variable to state this object has not yet been initialized 
         #  (i.e., the sample file parsed for species)
         self.initialized = False
         
-    def update_parameters(self, **kwargs):
+    def set_parameters(self, **kwargs):
         """
         """
         keys = kwargs.keys()
         for param in keys:
             self.parameters_[param] = kwargs[param]
             
-    def list_parameters(self):
+    def get_parameters(self):
         """
         """
         keys = self.parameters_.keys()
         keys.sort()
         return keys
         
+    def get_parameter(self, *args):
+        """
+        """
+        params = {}
+        for item in args:
+            params[item] = self.parameters_[item]
+
+        return params
+        
     def initialize(self, **kwargs):
         """
         """
-        # update the parameters dictionary to 
+        # get ready for just so, so many if statements.
+        
+        # set a flag to track progress on whether the settings are correct
+        flag = True
         
         # check that the bare minimum parameters have been set
         if self.parameters_['samples'] is None:
-            print("[ ERROR! ]: no sample file has been set. Unable to initialize.")
-            return -1
+            prnt.error("no sample file has been set.")
+            flag = False
         
         if self.parameters_['env_layers'] is None:
-            print("[ ERROR! ]: no layers have been set. Unable to initialize.")
-            return -1
+            prnt.error("no environmental layers have been set.")
+            flag = False
+            
+        # check the input/output paths exist
+        if not test_file(self.parameters_['samples'], 'samples file'):
+            flag = False
+        
+        if not test_dir(self.parameters_['env_layers'], 'environmental layers directory'):
+            flag = False
+            
+        if not test_dir(self.parameters_['model_dir'], 'model output directory'):
+            flag = False
+            
+        if self.parameters_['bias_file'] is not None:
+            if not test_file(self.parameters_['bias_file'], 'bias file'):
+                flag = False
+                
+        if self.parameters_['test_samples'] is not None:
+            if not test_file(self.parameters_['test_samples'], 'test samples'):
+                flag = False
+                
+        if self.parameters_['predict_layers'] is not None:
+            if not test_dir(self.parameters_['predict_layers'], 'prediction directory'):
+                flag = False
+        
+        # check correct formatting for several options    
+        # set options for the features to use
+        features_types = ['linear', 'quadratic', 'product', 'threshold', 'hinge', 'auto']
+        features_default = ['hinge']
+        for feature in self.parameters_['features']:
+            if feature.lower() not in features_types:
+                prnt.error("incorrect feature specified: {}".format(', '.join(feature)))
+                prnt.error("must be one of: {}".format(', '.join(features_types)))
+                prnt.error("using default: {}".format(', '.join(features_default)))
+                continue
+            
+        # set how replicates are handled
+        replicate_types = ['crossvalidate', 'bootstrap', 'subsample']
+        replicate_types_default = 'crossvalidate'
+        if self.parameters_['replicate_type'].lower() not in replicate_types:
+            prnt.error("incorrect replicate type specified: {}".format(replicate_type))
+            prnt.error("must be one of: {}".format(', '.join(replicate_types)))
+            prnt.error("using default: {}".format(replicate_types_default))
+            self.parameters_['replicate_type'] = replicate_types_default
+            
+        # set test percentage to an integer if a float is passed
+        test_pct_default = 30
+        if type(self.parameters_['pct_test_points']) is float:
+            self.parameters_['pct_test_points'] = int(100 * self.parameters_['pct_test_points'])
+        else:
+            try:
+                self.parameters_['pct_test_points'] = int(test_pct)
+            except:
+                prnt.error("incorrect test percent specified: {}".format(self.parameters_['pct_test_points']))
+                prnt.error("must be an integer between 0-100")
+                prnt.error("using default: {}".format(test_pct_default))
+                self.parameters_['pct_test_points'] = test_pct_default
+
+        # set the format for output data reporting
+        formats = ['cloglog', 'logistic', 'cumulative', 'raw']
+        formats_default = 'logistic'
+        if self.parameters_['output_format'].lower() not in formats:
+            prnt.error("incorrect output format specified: {}".format(self.parameters_['output_format']))
+            prnt.error("must be one of: {}".format(', '.join(formats)))
+            prnt.error("using default: {}".format(formats_default))
+            self.outformat = formats_default
+            
+        # set the output file type
+        if self.parameters_['write_grids']:
+            types = ['asc', 'bil', 'grd', 'mxe']
+            types_default = 'bil'
+            if outtype.lower() not in types:
+                prnt.error("incorrect output data type specified: {}".format(outtype))
+                prnt.error("must be one of: {}".format(', '.join(types)))
+                prnt.error("using default: {}".format(types_default))
+                self.outtype = types_default
+            
+        # then update with the flag - should be true if no problems arose
+        self.initialized = flag
+    
+    def get_layers(self):
+        """
+        """
     
     def set_layers(self, directory, layers=None):
+        """
+        """
+        
+    def get_species(self):
+        """
+        """
+        
+    def set_species(self, species):
         """
         """
         
     def build_string(self):
         """
         """
+        # first, check whether the options have been parsed through the initializer
+        if not self.initialized:
+            self.initialize()
+            
+        # then get ready for just a stupid number of if statements
+        s = []
+        join = ' '
+        sp_join = '_'
         
-        # set options for the features to use
-        features_types = ['linear', 'quadratic', 'product', 'threshold', 'hinge', 'auto']
-        features_default = ['hinge']
-        if features in features_types:
-            self.features = features
-        else:
-            print("[ ERROR! ]: incorrect features specified: {}".format(', '.join(features)))
-            print("[ ERROR! ]: must be one of: {}".format(', '.join(features_types)))
-            print("[ ERROR! ]: using default: {}".format(', '.join(features_default)))
-            
-        # set how replicates are handled
-        replicate_types = ['crossvalidate', 'bootstrap', 'subsample']
-        replicate_types_default = 'crossvalidate'
-        if replicate_type.lower() in replicate_types:
-            self.replicate_type = replicate_type
-        else:
-            print("[ ERROR! ]: incorrect replicate type specified: {}".format(replicate_type))
-            print("[ ERROR! ]: must be one of: {}".format(', '.join(replicate_types)))
-            print("[ ERROR! ]: using default: {}".format(replicate_types_default))
-            self.replicate_type = replicate_types_default
-            
-        # set test percentage to an integer if a float is passed
-        test_pct_default = 30
-        if type(test_pct) is float:
-            self.test_pct = int(100 * test_pct)
-        else:
-            try:
-                self.test_pct = int(test_pct)
-            except:
-                print("[ ERROR! ]: incorrect test percent specified: {}".format(test_pct))
-                print("[ ERROR! ]: must be an integer between 0-100")
-                print("[ ERROR! ]: using default: {}".format(test_pct_default))
-                self.test_pct = test_pct_default
+        # set the strings for running maxent command
+        s.append(self.parameters_['path_java'])
+        s.append('-mx{}m'.format(self.parameters_['mem']))
+        s.append('-jar')
+        s.append(self.parameters_['path_maxent'])
 
-        # set the format for output data reporting
-        formats = ['cloglog', 'logistic', 'cumulative', 'raw']
-        formats_default = 'logistic'
-        if outformat.lower() in formats:
-            self.outformat = outformat
-        else:
-            print("[ ERROR! ]: incorrect output format specified: {}".format(outformat))
-            print("[ ERROR! ]: must be one of: {}".format(', '.join(formats)))
-            print("[ ERROR! ]: using default: {}".format(formats_default))
-            self.outformat = formats_default
+        # set it to autorun
+        s.append('-a')
+        
+        # set the environmental layers
+        s.append('-e')
+        s.append(self.parameters_['env_layers'])
+        
+        # call out which layers will not be used, if set
+        if not self.parameters_['all_layers']:
+            diff = self.parameters_['layers_original'] - self.parameters_['layers_list']
+            for layer in diff:
+                s.append('-N')
+                s.append(layer)
+        
+        # set the samples CSV
+        s.append('-s')
+        s.append(self.parameters_['samples'])
+        
+        # call out which species will be mapped if not all
+        if not self.parameters_['all_species']:
+            for sp in self.parameters_['species_list']:
+                s.append('-E')
+                split = sp.split()
+                s.append(sp_join.join(split))
+                
+        # set the output directory
+        s.append('-o')
+        s.append(self.parameters_['model_dir'])
+        
+        # set the optional bias/test/prediction data
+        if self.parameters_['bias_file'] is not None:
+            s.append('biasfile={}'.format(self.parameters_['bias_file']))
+        if self.parameters_['predict_layers'] is not None:
+            s.append('-j')
+            s.append(self.parameters_['predict_layers'])
+        
+        # set how test data are handled
+        if self.parameters_['test_samples'] is not None:
+            s.append('-T')
+            s.append(self.parameters_['test_samples'])
+        elif self.parameters_['pct_test_points'] is not 0:
+            s.append('-X')
+            s.append(self.parameters_['pct_test_points'])
             
-        # set the output file type
-        types = ['asc', 'bil', 'grd', 'mxe']
-        types_default = 'bil'
-        if outtype.lower() in types:
-            self.outtype = outtype
-        else:
-            print("[ ERROR! ]: incorrect output data type specified: {}".format(outtype))
-            print("[ ERROR! ]: must be one of: {}".format(', '.join(types)))
-            print("[ ERROR! ]: using default: {}".format(types_default))
-            self.outtype = types_default
+        # set background and replicate data
+        s.append('-MB')
+        s.append(self.parameters_['n_background'])
+        s.append
         
     def fit(self):
         """
         """
         # check that the object has been initialized to check on
         if not self.initialized:
-            print("[ ERROR! ]: unable to run maxent. run {}.initialize() first".format(self.__name__))
-            return -1
+            init = self.initalize()
+            if not init:
+                prnt.error("unable to run maxent. update your parameters then re-run {}.initialize()".format(self.__name__))
+                return False
             
         # fist build the string to create the 
