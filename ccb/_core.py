@@ -2,9 +2,11 @@
 """
 import os as _os
 import pandas as _pd
+import glob as _glob
 import subprocess as _sp
 import multiprocessing as _mp
 from psutil import virtual_memory as _vm
+
 
 # get info on the cpu for setting memory/thread limits
 _ncpu = _mp.cpu_count()
@@ -121,8 +123,8 @@ class maxent:
             'species_list': None,
             'all_species': True,
             'layers_list': None,
+            'layers_ignore': None,
             'layers_original': None,
-            'all_layers': True,
             # and set a bunch of misc parameters that are usually too dumb to try and set
             'response_curves': False,
             'pictures': False,
@@ -134,7 +136,7 @@ class maxent:
             'warnings': False,
             'tooltips': False,
             'ask_overwrite': False,
-            'skip_if_exists': False,
+            'skip_if_exists': True,
             'remove_duplicates': True,
             'write_clamp_grid': False,
             'write_mess': False,
@@ -150,7 +152,7 @@ class maxent:
             'visible': False,
             'auto_feature': False,
             'do_clamp': False,
-            'plots': False,
+            'plots': True,
             'append_to_results_file': False,
             'maximum_iterations': 500,
             'convergence_threshold': 1e-5,
@@ -168,12 +170,11 @@ class maxent:
             'allow_partial_data': False,
             'nodata': -9999,
             'prefixes': True,
-            'path_maxent': 'maxent.jar',
+            'path_maxent': '/ccb/maxent.jar',
             'path_java': 'java'
             }
-        
-        # set a dummy variable to state this object has not yet been initialized 
-        #  (i.e., the sample file parsed for species)
+            
+        # set a variable to track whether the object has been init
         self.initialized_ = False
         
     def set_parameters(self, **kwargs):
@@ -214,6 +215,9 @@ class maxent:
         
         if not test_dir(self.parameters_['env_layers'], 'environmental layers directory'):
             flag = False
+        else:
+            # if it does exist, populate the layers list
+            self.parameters_['layers_original'] = self.get_layers()
             
         if not test_dir(self.parameters_['model_dir'], 'model output directory'):
             flag = False
@@ -281,16 +285,61 @@ class maxent:
                 self.outtype = types_default
             
         # then update with the flag - should be true if no problems arose
-        self.initialized_ = flag
+        self.initialized_ = True
         return flag
     
     def get_layers(self):
         """
         """
+        # find the raw layers files
+        bil = _glob.glob('{}/*.bil'.format(self.parameters_['env_layers']))
+        asc = _glob.glob('{}/*.asc'.format(self.parameters_['env_layers']))
+        grd = _glob.glob('{}/*.grd'.format(self.parameters_['env_layers']))
+        mxe = _glob.glob('{}/*.mxe'.format(self.parameters_['env_layers']))
+        files = bil + asc + grd + mxe
+        
+        # get the base name for each file
+        base = [_os.path.basename(f) for f in files]
+        
+        # then strip the extension and return the list of layer names
+        layers = [(_os.path.splitext(b))[0] for b in base]
+        layers.sort()
+        return layers
     
-    def set_layers(self, directory, layers=None):
+    def set_layers(self, layers):
         """
         """
+        # check initialized to ensure a directory is set
+        if not self.initialized_:
+            if not self.initialize():
+                prnt.error('cannot set layers - fix obj.initialize() errors first')
+                return False
+                
+        # set an output list to store the set layers
+        output_layers = []
+        
+        # get the number of layers set, total number of layers in directory
+        nl = len(layers)
+        na = len(self.parameters_['layers_original'])
+        
+        # check that the layers passed are in the list of available layers
+        for lyr in layers:
+            # if its a string, check its available
+            if type(lyr) is str:
+                if lyr in self.parameters_['layers_original']:
+                    output_layers.append(lyr)
+                else:
+                    prnt.error('invalid layer set: {}'.format(lyr))
+                
+            # if its an integer, use it as an index
+            if type(lyr) is int:
+                output_layers.append(self.parameters_['layers_original'][lyr])
+                
+        # set the layers we plan to use
+        self.parameters_['layers_list'] = output_layers
+        
+        # but more importantly for maxent, the ones we will ignore
+        self.parameters_['layers_ignore'] = list(set(self.parameters_['layers_original']) - set(output_layers))
         
     def get_species(self):
         """
@@ -304,11 +353,9 @@ class maxent:
         """
         """
         # first, check whether the options have been parsed through the initializer
-        if not self.initialized_:
-            init = self.initialize()
-            if not init:
-                prnt.error("unable to build cmd string. update your parameters then re-run object.initialize()")
-                return False
+        if not self.initialize():
+            prnt.error("unable to build cmd string. update your parameters then re-run object.initialize()")
+            return False
             
         # then get ready for just a stupid number of if statements
         s = []
@@ -329,9 +376,8 @@ class maxent:
         s.append(self.parameters_['env_layers'])
         
         # call out which layers will not be used, if set
-        if not self.parameters_['all_layers']:
-            diff = self.parameters_['layers_original'] - self.parameters_['layers_list']
-            for layer in diff:
+        if self.parameters_['layers_ignore'] is not None:
+            for layer in self.parameters['layers_ignore']:
                 s.append('-N')
                 s.append(layer)
         
@@ -504,17 +550,9 @@ class maxent:
         # return the concatenated string
         return join.join(s)
         
-        
     def fit(self):
         """
         """
-        # check that the object has been initialized to check on
-        if not self.initialized:
-            init = self.initialize()
-            if not init:
-                prnt.error("unable to run maxent. update your parameters then re-run object.initialize()")
-                return False
-            
         # fist build the string to create the output command
         cmd = self.build_cmd()
         
