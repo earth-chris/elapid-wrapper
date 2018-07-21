@@ -1,8 +1,8 @@
 Bootstrap: docker
-From: ubuntu:17.10 
+From: ubuntu:16.04 
 
 %help
-    Singularity image based on ubuntu 17.10 with spatial python software
+    Singularity image based on ubuntu 16.04 with spatial python software
     https://github.com/tianon/docker-brew-ubuntu-core/blob/85822fe532df3854da30b4829c31878ac51bcb91/xenial/Dockerfile
     Maintained by Christopher Anderson (cbanders@stanford.edu) @christobal54
 
@@ -17,6 +17,7 @@ From: ubuntu:17.10
 %environment
     # set the path to the ipython configuration
     #  make sure you have a $CCB environment variable on your local machine to your ccb directory
+    export PYTHONPATH=$CCB:$PYTHONPATH
     export IPYTHONDIR=$CCB/ipython
     export PATH=$CCB/bin:$PATH
 
@@ -41,6 +42,7 @@ From: ubuntu:17.10
     	python-sklearn \
     	python-pandas \
     	python-geopandas \
+    	python-matplotlib \
     	python-qt4 \
     	python-sip \
     	python-pyside \
@@ -50,7 +52,9 @@ From: ubuntu:17.10
     	git \
     	vim \
     	openssl \
-    	default-jdk
+    	default-jdk \
+    	unzip \
+    	wget
     	
     # install the orfeo toolbox packages
     apt-add-repository -y ppa:ubuntugis/ubuntugis-unstable 
@@ -62,9 +66,8 @@ From: ubuntu:17.10
     rm -rf /var/lib/apt/lists/*
 
     # install pip packages
-    pip install natcap.invest \
-    	matplotlib \
-    	jupyter \
+    pip install pip==9.0.1
+    pip install jupyter \
     	qtpy \
     	shapely \
     	Pyro4 \
@@ -84,10 +87,16 @@ From: ubuntu:17.10
         earthengine-api
         
     # get some fresh matplotlib
-    pip install --upgrade matplotlib oauth2client setuptools ipython
+    pip install --upgrade matplotlib oauth2client setuptools
 
     # since pyprosail is broken on default, move some files around
     mv /usr/local/lib/python2.7/dist-packages/PyPROSAIL/_prosail_model.so /usr/local/lib/python2.7/dist-packages/pyprosail/
+
+    # download the maxent binary
+    cd /ccb
+    wget https://biodiversityinformatics.amnh.org/open_source/maxent/maxent.php?op=download -O maxent.zip
+    unzip maxent.zip
+    rm maxent.bat maxent.sh maxent.zip
 
 %runscript
     echo "--- ccb-dev-container ---"
