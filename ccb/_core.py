@@ -1,6 +1,7 @@
 """Core functions and operations for the ccb library.
 """
 import os as _os
+import numpy as _np
 import pandas as _pd
 import glob as _glob
 import subprocess as _sp
@@ -126,7 +127,7 @@ class maxent:
             'layers_ignore': None,
             'layers_original': None,
             # and set a bunch of misc parameters that are usually too dumb to try and set
-            'response_curves': False,
+            'response_curves': True,
             'pictures': False,
             'jackknife': False,
             'output_format': 'logistic',
@@ -146,7 +147,7 @@ class maxent:
             'response_curve_exponent': False,
             'add_samples_to_background': False,
             'add_all_samples_to_background': False,
-            'write_plot_data': False,
+            'write_plot_data': True,
             'fade_by_clamping': False,
             'extrapolate': True,
             'visible': False,
@@ -344,10 +345,123 @@ class maxent:
     def get_species(self):
         """
         """
+        # check that the input file exists
+        if not test_file(self.parameters_['samples'], 'samples file'):
+            prnt.error('unable to get species list')
+            return None
+        
+        # pull the unique species ids from the csv file
+        df = _pd.read_csv(self.parameters_['samples'])
+        sp_list = (df['species'].unique()).tolist()
+        sp_list.sort()
+        
+        # then update the parameters to include the species list
+        #self.parameters_['species_list'] = sp_list
+        return sp_list
         
     def set_species(self, species):
         """
         """
+        # first get the full species list
+        sp_list = self.get_species()
+        
+        # if a string is passed, convert it to a list so it is compatible with other iterables
+        if type(species) is str:
+            species = [species]
+        
+        # then check that the species passed are in the available list of species
+        sp_flag = False
+        sp_set = []
+        for sp in species:
+            if sp not in sp_list:
+                prnt.error('Unable to set species: {}'.format(sp))
+            else:
+                sp_set.append(sp)
+                
+        # return the list of available species if any were incorrectly set, otherwise update the params list
+        if sp_flag:
+            prnt.error('Available species include: {}'.format(', '.join(sp_list)))
+        else:
+            self.parameters_['all_species'] = False
+            self.parameters_['species_list'] = sp_set
+            
+    def get_predictions(self, species, prediction_type='logistic'):
+        """
+        """
+        # check that the species passed is in the available list of species
+        sp_list = self.get_species()
+        if not species in sp_list:
+            prnt.error('Unable to get predictions for species: {}'.format(species))
+            prnt.error('Available species include: {}'.format(', '.join(sp_list)))
+            return None
+            
+        # check that the type of prediction passed is valid
+        pred_list = ['cloglog', 'logistic', 'cumulative', 'raw']
+        if prediction_type not in pred_list:
+            prnt.error('Prediction type not supported: {}'.format(prediction_type))
+            prnt.error('Available options include: {}'.format(', '.join(pred_list)))
+            return None
+            
+        # reconcile the stupid differences in column names for prediction type
+        if prediction_type is 'raw':
+            sample_column = 'Raw prediction'
+            backgr_column = 'raw'
+        elif prediction_type is 'cumulative':
+            sample_column = 'Cumulative prediction'
+            backgr_column = 'cumulative'
+        elif prediction_type is 'logistic':
+            sample_column = 'Logistic prediction'
+            backgr_column = 'Logistic'
+        else:
+            sample_column = 'Cloglog prediction'
+            backgr_column = 'cloglog'
+            
+        # build the strings to the prediction file paths
+        sp_join = '_'
+        sample_path = '{directory}/{sp}_samplePredictions.csv'.format(
+            directory=self.parameters_['model_dir'], sp=sp_join.join(species.split()))
+        backgr_path = '{directory}/{sp}_backgroundPredictions.csv'.format(
+            directory=self.parameters_['model_dir'], sp=sp_join.join(species.split()))
+        
+        # test that these files exist
+        sample_exists = test_file(sample_path, 'sample predictions file')
+        backgr_exists = test_file(backgr_path, 'background precitions file')
+        
+        # if neither of them are there, don't return shit
+        if not (sample_exists or backgr_exists):
+            prnt.error('Unable to get predictions')
+            return None
+        
+        # otherwise, read the data that do exist
+        if sample_exists:
+            df = _pd.read_csv(sample_path)
+            
+            # remove nodata values
+            good_vals = _np.invert(df[sample_column].isnull())
+            df = df[good_vals]
+            nl = len(df)
+            
+            # then get arrays for the sample predictions
+            y_true = _np.ones(nl)
+            y_pred = _np.array(df[sample_column])
+            
+        if backgr_exists:
+            df = _pd.read_csv(backgr_path)
+            
+            # remoe nodata values
+            good_vals = _np.invert(df[backgr_column].isnull())
+            df = df[good_vals]
+            nl = len(df)
+            
+            # append these to the existing arrays if sample predictions already exist
+            if sample_exists:
+                y_true = _np.append(y_true, _np.zeros(nl))
+                y_pred = _np.append(y_pred, _np.array(df[backgr_column]))
+            else:
+                y_true = _np.zeros(nl)
+                y_pred = _np.array(df[backgr_column])
+                
+        return [y_true, y_pred]
         
     def build_cmd(self):
         """
