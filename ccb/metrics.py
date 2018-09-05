@@ -1,6 +1,7 @@
 """
 """
 import numpy as _np
+from sklearn import metrics as _metrics
 
 
 # a series of metrics for binary classification that accept categorical or continuous data
@@ -10,6 +11,7 @@ def binary_classes(y_true, y_pred):
     n_ind = y_true == 0
     p_ind = y_true == 1
     
+    # calculate the number of positive and negative samples
     n_sum = float(n_ind.sum())
     p_sum = float(p_ind.sum())
     
@@ -52,6 +54,12 @@ def recall(y_true, y_pred):
 def f1_score(y_true, y_pred):
     """
     """
-    recall = recall(y_true, y_pred)
-    precision = precision(y_true, y_pred)
-    return 2 * ((precision * recall) / (precision + recall))
+    rec = recall(y_true, y_pred)
+    prec = precision(y_true, y_pred)
+    return 2 * ((prec * rec) / (prec + rec))
+    
+
+def roc_auc(y_true, y_pred):
+    """
+    """
+    return _metrics.roc_auc_score(y_true, y_pred)

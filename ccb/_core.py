@@ -4,6 +4,7 @@ import os as _os
 import numpy as _np
 import pandas as _pd
 import glob as _glob
+import numbers as _num
 import subprocess as _sp
 import multiprocessing as _mp
 from psutil import virtual_memory as _vm
@@ -131,7 +132,7 @@ class maxent:
             'pictures': False,
             'jackknife': False,
             'output_format': 'logistic',
-            'output_type': 'bil',
+            'output_type': 'asc',
             'random_seed': False,
             'log_scale': True,
             'warnings': False,
@@ -150,7 +151,7 @@ class maxent:
             'write_plot_data': True,
             'fade_by_clamping': False,
             'extrapolate': True,
-            'visible': False,
+            'visible': True,
             'auto_feature': False,
             'do_clamp': False,
             'plots': True,
@@ -170,7 +171,7 @@ class maxent:
             'verbose': True,
             'allow_partial_data': False,
             'nodata': -9999,
-            'prefixes': True,
+            'prefixes': False,
             'path_maxent': '/ccb/maxent.jar',
             'path_java': 'java'
             }
@@ -185,14 +186,14 @@ class maxent:
         for param in keys:
             self.parameters_[param] = kwargs[param]
             
-    def get_parameter_keys(self):
+    def get_keys(self):
         """
         """
         keys = self.parameters_.keys()
         keys.sort()
         return keys
         
-    def get_parameter(self, *args):
+    def get_parameters(self, *args):
         """
         """
         params = {}
@@ -220,8 +221,12 @@ class maxent:
             # if it does exist, populate the layers list
             self.parameters_['layers_original'] = self.get_layers()
             
-        if not test_dir(self.parameters_['model_dir'], 'model output directory'):
-            flag = False
+        if not test_dir(self.parameters_['model_dir'], 'model output (model_dir)'):
+            try:
+                _os.makedirs(self.parameters_['model_dir'])
+                prnt.status('created output directory: {}'.format(self.parameters_['model_dir']))
+            except:
+                flag = False
             
         if self.parameters_['bias_file'] is not None:
             if not test_file(self.parameters_['bias_file'], 'bias file'):
@@ -279,7 +284,7 @@ class maxent:
         if self.parameters_['write_grids']:
             types = ['asc', 'bil', 'grd', 'mxe']
             types_default = 'bil'
-            if outtype.lower() not in types:
+            if self.parameters_['output_type'] not in types:
                 prnt.error("incorrect output data type specified: {}".format(outtype))
                 prnt.error("  must be one of: {}".format(', '.join(types)))
                 prnt.error("  using default: {}".format(types_default))
@@ -315,6 +320,10 @@ class maxent:
             if not self.initialize():
                 prnt.error('cannot set layers - fix obj.initialize() errors first')
                 return False
+                
+        # if a single layers is passed as a string, convert it to a list to support iteration
+        if type(layers) is str:
+            layers = [layers]
                 
         # set an output list to store the set layers
         output_layers = []
@@ -385,7 +394,7 @@ class maxent:
             self.parameters_['all_species'] = False
             self.parameters_['species_list'] = sp_set
             
-    def get_predictions(self, species, prediction_type='logistic'):
+    def get_predictions(self, species, prediction_type='raw', test=False):
         """
         """
         # check that the species passed is in the available list of species
@@ -439,6 +448,17 @@ class maxent:
             # remove nodata values
             good_vals = _np.invert(df[sample_column].isnull())
             df = df[good_vals]
+            
+            # subset the test data if set
+            if test:
+                # check if test values are in the data
+                try:
+                    if len(df[df['Test or train'] == 'test']) > 0:
+                        df = df[df['Test or train'] == 'test']
+                except:
+                    prnt.error('Unable to subset test data')
+            
+            # set the output array size
             nl = len(df)
             
             # then get arrays for the sample predictions
@@ -491,7 +511,7 @@ class maxent:
         
         # call out which layers will not be used, if set
         if self.parameters_['layers_ignore'] is not None:
-            for layer in self.parameters['layers_ignore']:
+            for layer in self.parameters_['layers_ignore']:
                 s.append('-N')
                 s.append(layer)
         
@@ -523,12 +543,13 @@ class maxent:
             s.append(self.parameters_['test_samples'])
         elif self.parameters_['pct_test_points'] is not 0:
             s.append('-X')
-            s.append(self.parameters_['pct_test_points'])
+            s.append('{:d}'.format(self.parameters_['pct_test_points']))
             
         # set background and replicate data
         s.append('maximumbackground={}'.format(self.parameters_['n_background']))
-        s.append('replicates={}'.format(self.parameters_['n_replicates']))
-        s.append('replicatetype={}'.format(self.parameters_['replicate_type']))
+        if self.parameters_['n_replicates'] > 1:
+            s.append('replicates={}'.format(self.parameters_['n_replicates']))
+            s.append('replicatetype={}'.format(self.parameters_['replicate_type']))
         
         # set options for writing grid data
         if self.parameters_['write_grids']:
@@ -536,6 +557,11 @@ class maxent:
         else:
             s.append('-x')
         s.append('outputformat={}'.format(self.parameters_['output_format']))
+        
+        # set nodata value
+        if self.parameters_['nodata'] is not None:
+            s.append('-n')
+            s.append('{}'.format(self.parameters_['nodata']))
         
         # set a bunch of boolean features based on their default on/off settings
         #  (i.e., only turn on params that are default off, only turn off params that
@@ -560,7 +586,7 @@ class maxent:
             s.append('noaskoverwrite')
         
         if self.parameters_['skip_if_exists']:
-            s.append('-s')
+            s.append('-S')
             
         if not self.parameters_['remove_duplicates']:
             s.append('noremoveduplicates')
@@ -584,7 +610,7 @@ class maxent:
             s.append('noaddsamplestobackground')
         
         if not self.parameters_['add_all_samples_to_background']:
-            s.append('addallsamplestobackground')
+            s.append('noaddallsamplestobackground')
             
         if self.parameters_['fade_by_clamping']:
             s.append('fadebyclamping')
@@ -671,8 +697,13 @@ class maxent:
         cmd = self.build_cmd()
         
         # then run the dang thing
-        prnt.status('starting maxent run')
-        prnt.status('  samples: {}'.format(self.parameters_['samples']))
-        prnt.status('  outputs: {}'.format(self.parameters_['model_dir']))
+        if type(cmd) is str:
+            prnt.status('starting maxent run')
+            prnt.status('  samples: {}'.format(self.parameters_['samples']))
+            prnt.status('  outputs: {}'.format(self.parameters_['model_dir']))
+            
+            run(cmd)
         
-        run(cmd)
+        # if the build_cmd failed, send nothin' back    
+        else:
+            return None

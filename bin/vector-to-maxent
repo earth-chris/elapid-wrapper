@@ -129,7 +129,7 @@ if geo:
         
 # create a new dataframe with just the species/x/y data
 labels_input = [args.field, args.xfield, args.yfield]
-labels_output = {args.field: 'species', args.xfield: 'x', args.yfield: 'y'}
+labels_output = {args.field: 'species', args.xfield: 'X', args.yfield: 'Y'}
 maxent_df = vector[labels_input].rename(columns=labels_output)
 
 # then write the output file

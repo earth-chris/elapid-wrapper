@@ -28,6 +28,7 @@ From: ubuntu:16.04
     apt-get install -y \
     	python-gdal \
     	gdal-bin \
+    	libgdal-dev \
     	ipython \
     	python-setuptools \
     	python-dev \
@@ -87,7 +88,7 @@ From: ubuntu:16.04
         earthengine-api
         
     # get some fresh matplotlib
-    pip install --upgrade matplotlib oauth2client setuptools
+    pip install --upgrade matplotlib oauth2client setuptools geopandas
 
     # since pyprosail is broken on default, move some files around
     mv /usr/local/lib/python2.7/dist-packages/PyPROSAIL/_prosail_model.so /usr/local/lib/python2.7/dist-packages/pyprosail/
