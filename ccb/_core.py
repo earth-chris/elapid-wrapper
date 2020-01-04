@@ -657,13 +657,13 @@ class maxent:
                 s.append('noquadratic')
                 
             if 'product' in self.parameters_['features']:
-                s.append('l2qlptthreshold={}'.format(self.parameters_['min_samples_theshold_product']))
+                s.append('l2qlptthreshold={}'.format(self.parameters_['min_samples_threshold_product']))
                 s.append('beta_lqp={}'.format(self.parameters_['beta_lqp']))
             else:
                 s.append('noproduct')
                 
             if 'threshold' in self.parameters_['features']:
-                s.append('l2qlptthreshold={}'.format(self.parameters_['min_samples_theshold_product']))
+                s.append('l2qlptthreshold={}'.format(self.parameters_['min_samples_threshold_product']))
                 s.append('beta_threshold={}'.format(self.parameters_['beta_threshold']))
             else:
                 s.append('nothreshold')
