@@ -27,7 +27,7 @@ def run(cmd, stderr=True):
     
     # run the command, and return stdout as a list
     try:
-        proc = _sp.check_output(command, shell=True, stderr=se)
+        proc = _sp.check_output(cmd, shell=True, stderr=se)
 
         # return the proc string
         return proc.split(b"\n")
