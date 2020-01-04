@@ -1,3 +1,3 @@
 from ._core import *
-import read
-import metrics
+from . import read
+from . import metrics
