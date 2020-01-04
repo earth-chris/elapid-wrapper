@@ -31,7 +31,7 @@ def run(cmd, stderr=True):
           stderr = se)
         return proc.split("\n")
         
-    except _sp.CalledProcessError, e:
+    except:
         output = e.output.strip()
         sp = output.find(":") + 2
         prnt.error(output[sp:])
