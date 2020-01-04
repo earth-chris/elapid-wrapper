@@ -35,7 +35,7 @@ def run(cmd, stderr=True):
     # raise an exception and print the error if the command fails    
     except _sp.CalledProcessError as e:
         output = e.output.strip()
-        sp = output.find(":") + 2
+        sp = output.find(b":") + 2
         print(output[sp:])
         return e.output.strip().split(b"\n")
 
