@@ -189,7 +189,7 @@ class maxent:
     def get_keys(self):
         """
         """
-        keys = self.parameters_.keys()
+        keys = list(self.parameters_.keys())
         keys.sort()
         return keys
         
