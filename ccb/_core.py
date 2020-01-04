@@ -27,16 +27,16 @@ def run(cmd, stderr=True):
     
     # run the command, and return stdout as a list
     try:
-        proc = subprocess.check_output(command, shell=True, stderr=se)
+        proc = _sp.check_output(command, shell=True, stderr=se)
 
         # return the proc string
         return proc.split(b"\n")
 
     # raise an exception and print the error if the command fails    
-    except subprocess.CalledProcessError as e:
+    except _sp.CalledProcessError as e:
         output = e.output.strip()
         sp = output.find(":") + 2
-        prnt.error(output[sp:], file=file)
+        print(output[sp:])
         return e.output.strip().split(b"\n")
 
 
