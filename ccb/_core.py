@@ -152,7 +152,7 @@ class maxent:
             'add_all_samples_to_background': False,
             'write_plot_data': True,
             'fade_by_clamping': False,
-            'extrapolate': True,
+            'extrapolate': False,
             'visible': True,
             'auto_feature': False,
             'do_clamp': False,
