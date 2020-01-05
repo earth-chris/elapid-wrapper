@@ -133,7 +133,7 @@ class maxent:
             'response_curves': True,
             'pictures': False,
             'jackknife': False,
-            'output_format': 'logistic',
+            'output_format': 'cumulative',
             'output_type': 'asc',
             'random_seed': False,
             'log_scale': True,
