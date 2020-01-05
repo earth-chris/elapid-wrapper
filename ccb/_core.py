@@ -165,7 +165,7 @@ class maxent:
             'mem': mem,
             'min_samples_threshold_product': 80,
             'min_samples_quadratic': 10,
-            'min_samples_hinge': 15,
+            'min_samples_hinge': 12,
             'beta_threshold': -1.,
             'beta_categorical': -1.,
             'beta_lqp': -1.,
@@ -500,6 +500,8 @@ class maxent:
         
         # set the strings for running maxent command
         s.append(self.parameters_['path_java'])
+        
+        # don't explicitly set memory -- it breaks headless model runs
         #s.append('-mx{}m'.format(self.parameters_['mem']))
         s.append('-jar')
         s.append(self.parameters_['path_maxent'])
@@ -659,7 +661,7 @@ class maxent:
                 s.append('noquadratic')
                 
             if 'product' in self.parameters_['features']:
-                s.append('l2qlpthreshold={}'.format(self.parameters_['min_samples_threshold_product']))
+                s.append('lq2lqptthreshold={}'.format(self.parameters_['min_samples_threshold_product']))
                 s.append('beta_lqp={}'.format(self.parameters_['beta_lqp']))
             else:
                 s.append('noproduct')
