@@ -648,6 +648,8 @@ class maxent:
         # set a bunch of feature-specific parameters
         if not 'auto' in self.parameters_['features']:
             
+            s.append('noautofeature')
+            
             if not 'linear' in self.parameters_['features']:
                 s.append('nolinear')
                 
