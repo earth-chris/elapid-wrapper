@@ -560,7 +560,13 @@ class maxent:
             s.append('outputfiletype={}'.format(self.parameters_['output_type']))
         else:
             s.append('-x')
+        
+        # set the output model prediction format
         s.append('outputformat={}'.format(self.parameters_['output_format']))
+        
+        # add the tau value in logistic/cloglog predictions
+        if self.parameters_['output_format'] in ['logistic', 'cloglog']:
+            s.append('defaultprevalence={}'.format(self.parameters_['tau']))
         
         # set nodata value
         if self.parameters_['nodata'] is not None:
