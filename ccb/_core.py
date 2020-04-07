@@ -353,6 +353,44 @@ class maxent:
         # but more importantly for maxent, the ones we will ignore
         self.parameters_['layers_ignore'] = list(set(self.parameters_['layers_original']) - set(output_layers))
         
+    
+    def set_categorical(self, layers):
+        """
+        """
+        # check initialized to ensure a directory is set
+        if not self.initialized_:
+            if not self.initialize():
+                prnt.error('cannot set layers - fix obj.initialize() errors first')
+                return False
+                
+        # if a single layers is passed as a string, convert it to a list to support iteration
+        if type(layers) is str:
+            layers = [layers]
+                
+        # set an output list to store the set layers
+        output_layers = []
+        
+        # get the number of layers set, total number of layers in directory
+        nl = len(layers)
+        na = len(self.parameters_['layers_original'])
+        
+        # check that the layers passed are in the list of available layers
+        for lyr in layers:
+            # if its a string, check its available
+            if type(lyr) is str:
+                if lyr in self.parameters_['layers_original']:
+                    output_layers.append(lyr)
+                else:
+                    prnt.error('invalid layer set: {}'.format(lyr))
+                
+            # if its an integer, use it as an index
+            if type(lyr) is int:
+                output_layers.append(self.parameters_['layers_original'][lyr])
+                
+        # set the layers we plan to use
+        self.parameters_['categorical_list'] = output_layers
+
+        
     def get_species(self):
         """
         """
@@ -518,6 +556,12 @@ class maxent:
             for layer in self.parameters_['layers_ignore']:
                 s.append('-N')
                 s.append(layer)
+                
+        # set certain layers as categorical
+        if self.parameters_['categorical_list'] is not None:
+            for layer in self.parameters_['categorical_list']:
+                s.append('-t')
+                s.append(layer)
         
         # set the samples CSV
         s.append('-s')
@@ -550,7 +594,7 @@ class maxent:
             s.append('{:d}'.format(self.parameters_['pct_test_points']))
             
         # set background and replicate data
-        s.append('maximumbackground={}'.format(self.parameters_['n_background']))
+        s.append('maximumbackground={:d}'.format(int(self.parameters_['n_background'])))
         if self.parameters_['n_replicates'] > 1:
             s.append('replicates={}'.format(self.parameters_['n_replicates']))
             s.append('replicatetype={}'.format(self.parameters_['replicate_type']))
