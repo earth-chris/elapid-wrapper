@@ -61,12 +61,12 @@ col_names = ['kingdom',
             'family', 
             'genus',
             'species',
-            'decimallatitude',
-            'decimallongitude',
-            'coordinateuncertaintyinmeters',
+            'decimalLatitude',
+            'decimalLongitude',
+            'coordinateUncertaintyInMeters',
             'year',
-            'basisofrecord',
-            'datasetkey']
+            'basisOfRecord',
+            'datasetKey']
 
 col_types = {'kingdom': str, 
             'phylum': str, 
@@ -75,12 +75,12 @@ col_types = {'kingdom': str,
             'family': str, 
             'genus': str,
             'species': str, 
-            'decimallatitude': str,
-            'decimallongitude': str,
-            'coordinateuncertaintyinmeters': str,
+            'decimalLatitude': str,
+            'decimalLongitude': str,
+            'coordinateUncertaintyInMeters': str,
             'year':  str,
-            'basisofrecord': str,
-            'datasetkey': str}
+            'basisOfRecord': str,
+            'datasetKey': str}
 
 observation_type = ['HUMAN_OBSERVATION',
                    'PRESERVED_SPECIMEN', 
@@ -91,8 +91,8 @@ observation_type = ['HUMAN_OBSERVATION',
                    'MATERIAL_SAMPLE', 
                    'MACHINE_OBSERVATION']
                    
-valid_by = [args.taxonomic_level, 'decimallatitude','decimallongitude']
-duplicate_by = ['species', 'genus', 'decimallatitude','decimallongitude']
+valid_by = [args.taxonomic_level, 'decimalLatitude','decimalLongitude']
+duplicate_by = ['species', 'genus', 'decimalLatitude','decimalLongitude']
 
 # set the columns worth keeping
 final_columns = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'species', 'year']
@@ -100,17 +100,17 @@ final_columns = ['kingdom', 'phylum', 'class', 'order', 'family', 'genus', 'spec
 
 ############################
 # start reading the data and processing
-prtin("[ STATUS ]: Starting gbif-to-vector")
+print("[ STATUS ]: Starting gbif-to-vector")
 print("[ STATUS ]: Reading input file: {}".format(args.input))
 
 # read the data into memory and subset to just the relevant columns
 full = pd.read_csv(args.input, header=0, sep='\t', usecols=col_names, dtype=col_types, error_bad_lines=False)
 
 # then convert the numberic data types from strings
-full['decimallatitude'] = pd.to_numeric(full['decimallatitude'], errors='coerce')
-full['decimallongitude'] = pd.to_numeric(full['decimallongitude'], errors='coerce')
+full['decimalLatitude'] = pd.to_numeric(full['decimalLatitude'], errors='coerce')
+full['decimalLongitude'] = pd.to_numeric(full['decimalLongitude'], errors='coerce')
 full['year'] = pd.to_numeric(full['year'], errors='coerce')
-full['coordinateuncertaintyinmeters'] = pd.to_numeric(full['coordinateuncertaintyinmeters'], errors='coerce')
+full['coordinateUncertaintyInMeters'] = pd.to_numeric(full['coordinateUncertaintyInMeters'], errors='coerce')
 
 # start cleaning data
 print("[ STATUS ]: Removing bad data points")
@@ -120,24 +120,24 @@ full = full.dropna(subset=valid_by)
 
 # drop records that are too inpercise
 if args.precision is not None:
-    full = full.loc[full['coordinateuncertaintyinmeters'] <= args.precision]
+    full = full.loc[full['coordinateUncertaintyInMeters'] <= args.precision]
 
 # drop points with 0.0 lat/lon
-full = full.loc[full['decimallatitude']  != 0.0]
-full = full.loc[full['decimallongitude'] != 0.0]
+full = full.loc[full['decimalLatitude']  != 0.0]
+full = full.loc[full['decimalLongitude'] != 0.0]
 
 # drop it like its old
 full = full.loc[full['year'] >= args.min_year]
 
 # set observation types
-full = full[full['basisofrecord'].isin(observation_type)]
+full = full[full['basisOfRecord'].isin(observation_type)]
 
 # finally, remove duplicate points and clear the index
 full = full[np.invert(full.duplicated(subset=duplicate_by))]
 full.reset_index(drop = True, inplace = True)
 
 # now, we'll convert it to a geopandas dataframe
-geometry = [Point(xy) for xy in zip(full.decimallongitude, full.decimallatitude)] 
+geometry = [Point(xy) for xy in zip(full.decimalLongitude, full.decimalLatitude)] 
 crs = {'init': 'epsg:4326'}
 gdf = gpd.GeoDataFrame(full[final_columns], crs=crs, geometry=geometry)
 
@@ -168,6 +168,6 @@ landlubbers.drop('index_right', 1, inplace=True)
 landlubbers.rename(columns={'name': 'country'}, inplace=True)
 
 # export the output file
-landlubbers.to_file(args.output)
+landlubbers.to_file(args.output, driver='ESRI Shapefile')
 print("[ STATUS ]: Finished cleaning GBIF data!")
 print("[ STATUS ]: See output file: {}".format(args.output))
