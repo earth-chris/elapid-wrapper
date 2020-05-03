@@ -3,8 +3,6 @@
 import os as _os
 import pickle as _pickle
 import gdal as _gdal
-import numpy as _np
-import pandas as _pd
 
 _gdal.UseExceptions()
 

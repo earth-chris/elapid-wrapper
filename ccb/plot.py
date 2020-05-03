@@ -1,4 +1,10 @@
-# function to plot density distributions
+"""
+"""
+import numpy as _np
+import matplotlib.pyplot as _plt
+from scipy.stats import _gaussian_kde
+
+
 def density_dist(
     ydata,
     plot=None,
@@ -23,7 +29,6 @@ def density_dist(
                    values to plot in one figure.
         plot:      a matplotlib pyplot object. creates one if not set.
         color:     a single color or an array of colors to plot with
-        aei_color: a color function from aei.color to use to set the colors of the plot
         fill:      set this to true to fill the space beneath the distribution
         fill_alpha:the alpha value for the fill
         label:     the labels to assign in the legend
@@ -41,18 +46,13 @@ def density_dist(
     Returns:
         a matplotlib pyplot object
     """
-    import numpy as np
-
-    # from aei import color as clr
-    import matplotlib.pyplot as plt
-    from scipy.stats import gaussian_kde
 
     # we want ydata to come as a list form to handle uneven sample sizes
     if type(ydata) is list:
         ncol = len(ydata)
 
     # set up a function to handle numpy arrays
-    elif type(ydata) is np.ndarray:
+    elif type(ydata) is _np.ndarray:
 
         # if the ndarray is only 1-d, convert it to a list
         if ydata.ndim == 1:
@@ -70,27 +70,15 @@ def density_dist(
 
     # if a plot object isn't provided, create one
     if not plot:
-        plot = plt
-        plot.figure(np.random.randint(100))
-
-    # set the default aei_color function if not set by user
-    # if not aei_color:
-    #    aei_color = clr.color_blind
+        plot = _plt
+        plot.figure(_np.random.randint(100))
 
     # handle colors. if only one is passed, set it as a list for indexing
-    #  otherwise, check the number of colors is consistent with the
-    #  number of ydata columns for plotting
     if color is not None:
         if type(color) is str:
             color = list(color)
-    #    else:
-    #        if len(color) < ncol:
-    #            print("[ ERROR ]: number of colors specified doesn't match number of columns")
-    #            color = aei_color(ncol)
-    # else:
-    #    color = aei_color(ncol)
 
-    # handle labels similar to color, but do not assign defaults
+    # handle labels similar to color, but don't assign defaults
     if label is not None:
         if type(label) is str:
             label = list(label)
@@ -110,16 +98,16 @@ def density_dist(
         xmin = []
         xmax = []
         for i in range(ncol):
-            xmin.append(np.percentile(np.array(ydata[i]), cutoff))
-            xmax.append(np.percentile(np.array(ydata[i]), 100 - cutoff))
+            xmin.append(_np.percentile(np.array(ydata[i]), cutoff))
+            xmax.append(_np.percentile(np.array(ydata[i]), 100 - cutoff))
         xlim = [min(xmin), max(xmax)]
 
     # set the x plot size
-    xs = np.linspace(xlim[0], xlim[1])
+    xs = _np.linspace(xlim[0], xlim[1])
 
     # loop through each feature, calculate the covariance, and plot
     for i in range(ncol):
-        dns = gaussian_kde(np.array(ydata[i]))
+        dns = _gaussian_kde(_np.array(ydata[i]))
         dns.covariance_factor = lambda: covar
         dns._compute_covariance()
         ys = dns(xs)
