@@ -2,7 +2,7 @@
 """
 import numpy as _np
 import matplotlib.pyplot as _plt
-from scipy.stats import _gaussian_kde
+from scipy.stats import gaussian_kde as _gaussian_kde
 
 
 def density_dist(
