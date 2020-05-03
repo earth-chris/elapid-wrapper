@@ -275,7 +275,7 @@ class maxent:
         replicate_types = ["crossvalidate", "bootstrap", "subsample"]
         replicate_types_default = "crossvalidate"
         if self.parameters_["replicate_type"].lower() not in replicate_types:
-            prnt.error("incorrect replicate type specified: {}".format(replicate_type))
+            prnt.error("incorrect replicate type specified: {}".format(replicate_types))
             prnt.error("  must be one of: {}".format(", ".join(replicate_types)))
             prnt.error("  using default: {}".format(replicate_types_default))
             self.parameters_["replicate_type"] = replicate_types_default
@@ -305,7 +305,7 @@ class maxent:
             types = ["asc", "bil", "grd", "mxe"]
             types_default = "bil"
             if self.parameters_["output_type"] not in types:
-                prnt.error("incorrect output data type specified: {}".format(outtype))
+                prnt.error("incorrect output data type specified: {}".format(self.parameters_["output_type"]))
                 prnt.error("  must be one of: {}".format(", ".join(types)))
                 prnt.error("  using default: {}".format(types_default))
                 self.outtype = types_default
@@ -348,10 +348,6 @@ class maxent:
         # set an output list to store the set layers
         output_layers = []
 
-        # get the number of layers set, total number of layers in directory
-        nl = len(layers)
-        na = len(self.parameters_["layers_original"])
-
         # check that the layers passed are in the list of available layers
         for lyr in layers:
             # if its a string, check its available
@@ -386,10 +382,6 @@ class maxent:
 
         # set an output list to store the set layers
         output_layers = []
-
-        # get the number of layers set, total number of layers in directory
-        nl = len(layers)
-        na = len(self.parameters_["layers_original"])
 
         # check that the layers passed are in the list of available layers
         for lyr in layers:
@@ -455,7 +447,7 @@ class maxent:
         """
         # check that the species passed is in the available list of species
         sp_list = self.get_species()
-        if not species in sp_list:
+        if species not in sp_list:
             prnt.error("Unable to get predictions for species: {}".format(species))
             prnt.error("Available species include: {}".format(", ".join(sp_list)))
             return None
