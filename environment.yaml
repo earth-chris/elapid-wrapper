@@ -5,17 +5,13 @@ channels:
   - defaults
 
 dependencies:
-  - argparse
   - black
   - flake8
-  - flask
   - gdal
   - geopandas
-  - glob
   - isort
   - matplotlib
   - pandas
-  - pickle
   - pre-commit
   - psutil
   - pytest
