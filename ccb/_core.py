@@ -50,8 +50,8 @@ def test_file(path, file_name="file"):
         else:
             prnt.error("{} does not exist: {}".format(file_name, path))
             return False
-    except:
-        prnt.error("no {} path set".format(file_name))
+    except TypeError:
+        prnt.error("incorrect {} path type set".format(file_name))
         return False
 
 
@@ -65,8 +65,8 @@ def test_dir(path, directory_name="directory"):
         else:
             prnt.error("{} does not exist: {}".format(directory_name, path))
             return False
-    except:
-        prnt.error("no {} path set".format(directory_name))
+    except TypeError:
+        prnt.error("incorrect {} path type set".format(directory_name))
         return False
 
 

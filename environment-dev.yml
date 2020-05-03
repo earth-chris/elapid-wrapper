@@ -9,6 +9,7 @@ dependencies:
   - flake8
   - gdal
   - geopandas
+  - ipython
   - isort
   - matplotlib
   - openjdk
