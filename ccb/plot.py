@@ -23,28 +23,24 @@ def density_dist(
     cutoff=2,
     **kwargs,
 ):
-    """ Plots a density distribution. all data will be displayed on the same figure.
-    Args:
-        ydata:     a list of numpy arrays, or a 1- or 2-d numpy array of 
-                   values to plot in one figure.
-        plot:      a matplotlib pyplot object. creates one if not set.
-        color:     a single color or an array of colors to plot with
-        fill:      set this to true to fill the space beneath the distribution
-        fill_alpha:the alpha value for the fill
-        label:     the labels to assign in the legend
-        linewidth: the width of the density plot line
-        xlabel:    the x-axis label
-        ylabel:    the y-axis label
-        title:     the plot title
-        xlim:      a 2-element list of [xmin, xmax] for plotting
-        ylim:      a 2-element list for [ymin, ymax] for plotting !! NOT IMPLEMENTED
-        covar:     the covariance scalar for calculating the density dist.
-        cutoff:    the 0-100 based cutoff for clipping min/max values
-                   e.g. use 2 to clip from 2-98% of the values
-        **kwargs: pyplot.plot keyword arguments
-        
-    Returns:
-        a matplotlib pyplot object
+    """
+    Plots a density distribution. all data will be displayed on the same figure.
+    :param ydata: a list of numpy arrays, or a 1- or 2-d numpy array of values to plot in one figure.
+    :param plot: a matplotlib pyplot object. creates one if not set.
+    :param color: a single color or an array of colors to plot with
+    :param fill: set this to true to color the space beneath the distribution
+    :param fill_alpha: the alpha value for the fill
+    :param label: the labels to assign in the legend
+    :param linewidth: the width of the density plot line
+    :param xlabel: the x-axis label
+    :param ylabel: the y-axis label
+    :param title: the plot title
+    :param xlim: a 2-element list of [xmin, xmax] for plotting
+    :param ylim: a 2-element list for [ymin, ymax] for plotting !! NOT IMPLEMENTED
+    :param covar: the covariance scalar for calculating the density dist.
+    :param cutoff: the 0-100 based cutoff for clipping min/max values (e.g. use 2 to clip from 2-98% of the values)
+    :param **kwargs: matplotlib pyplot.plot keyword arguments
+    :return plot: a matplotlib pyplot object
     """
 
     # we want ydata to come as a list form to handle uneven sample sizes
@@ -98,8 +94,8 @@ def density_dist(
         xmin = []
         xmax = []
         for i in range(ncol):
-            xmin.append(_np.percentile(np.array(ydata[i]), cutoff))
-            xmax.append(_np.percentile(np.array(ydata[i]), 100 - cutoff))
+            xmin.append(_np.percentile(_np.array(ydata[i]), cutoff))
+            xmax.append(_np.percentile(_np.array(ydata[i]), 100 - cutoff))
         xlim = [min(xmin), max(xmax)]
 
     # set the x plot size
