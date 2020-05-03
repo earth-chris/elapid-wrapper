@@ -36,6 +36,24 @@ pip install -r requirements.txt
 python setup.py install
 ```
 
+## Contributing
+
+External contribution guidelines are not formally supported at this time--reach out to the [package developers](#contact) to facilitate contributions.
+
+A separate `conda` development environment was created to facilitate contributing well-formatted code to `ccb`. Create this environment with the following command.
+
+```bash
+conda env create --file=environment-dev.yml
+```
+
+This environment contains additional code formatting libraries, including `black`, `flake8`, `isort` and `pytest`. These tools are automatically applied to all code commits via the `pre-commit` library. To install `pre-commit`, run the following command:
+
+```bash
+pre-commit install
+```
+
+`pre-commit` behavior is defined in `.pre-commit-config.yaml`, specifying how to format the code, and cleaning up any formatting issues prior to accepting any commit. This should ensure that all pull requests are well-formatted.
+
 ## Contact
 
 * Christopher Anderson is the primary developer [[email][email-cba]] [[github][github-cba]]
