@@ -1,5 +1,6 @@
 #! /usr/bin/env python
 import argparse
+import importlib
 import numpy as np
 import pandas as pd
 import geopandas as gpd
@@ -8,7 +9,7 @@ from shapely.geometry import Point
 # hack some encoding stuff because fml
 import sys
 
-reload(sys)
+importlib.reload(sys)
 sys.setdefaultencoding("utf-8")
 
 
@@ -171,11 +172,9 @@ if args.country is not None:
     landlubbers = landlubbers[inds]
 
 # then reproject the data if not using the standard wgs-84 lat/lon
-if args.epsg is not 4326:
+if args.epsg != 4326:
     print("[ STATUS ]: Reprojecting to EPSG: {}".format(args.epsg))
-    # new_crs = {'init': args.t_srs.lower()}
     landlubbers.to_crs(epsg=args.epsg, inplace=True)
-    # landlubbers.crs = new_crs
 
 # then finally subset and rename the output columns
 landlubbers.drop("index_right", 1, inplace=True)

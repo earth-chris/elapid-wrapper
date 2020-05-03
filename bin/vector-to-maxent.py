@@ -39,11 +39,11 @@ def read_input(path):
     try:
         data = gpd.read_file(path)
         geo = True
-    except:
+    except FileNotFoundError:
         try:
             data = pd.read_csv(path)
             geo = False
-        except:
+        except FileNotFoundError:
             print("[ ERROR! ]: Unable to read file: {}".format(path))
             print("[ ERROR! ]: Please ensure it is a vector file or a CSV")
             sys.exit(1)
@@ -56,7 +56,7 @@ def check_fields(df, args, geo):
     attributes = df.columns.tolist()
 
     # check the species field is listed as a column in the dataframe
-    if not args.field in attributes:
+    if args.field not in attributes:
         print("[ ERROR! ]: Field set for species ID: {}".format(args.field))
         print("[ ERROR! ]: is not a vector attribute - select from the following:")
         print("[ ERROR! ]: [ {} ]".format(", ".join(attributes)))
@@ -64,14 +64,14 @@ def check_fields(df, args, geo):
 
     # if geometry is set as an attribute, check they are listed in the dataframe
     if args.xfield is not None:
-        if not args.xfield in attributes:
+        if args.xfield not in attributes:
             print("[ ERROR! ]: Field set for x data: {}".format(args.xfield))
             print("[ ERROR! ]: is not an attribute - select from the following:")
             print("[ ERROR! ]: [ {} ]".format(", ".join(attributes)))
             sys.exit(1)
 
     if args.yfield is not None:
-        if not args.yfield in attributes:
+        if args.yfield not in attributes:
             print("[ ERROR! ]: Field set for y data: {}".format(args.yfield))
             print("[ ERROR! ]: is not a vector attribute - select from the following:")
             print("[ ERROR! ]: [ {} ]".format(", ".join(attributes)))
@@ -79,13 +79,13 @@ def check_fields(df, args, geo):
 
     # or, if the input data are not a vector, ensure that the x, y, and projection info are set
     if not geo:
-        if not args.xfield in attributes:
+        if args.xfield not in attributes:
             print("[ ERROR! ]: Field set for x data (using --xfield): {}".format(args.xfield))
             print("[ ERROR! ]: is either not set or is not an attribute - select from the following:")
             print("[ ERROR! ]: [ {} ]".format(", ".join(attributes)))
             sys.exit(1)
 
-        if not args.yfield in attributes:
+        if args.yfield not in attributes:
             print("[ ERROR! ]: Field set for y data (using --yfield): {}".format(args.yfield))
             print("[ ERROR! ]: is either not set or is not an attribute - select from the following:")
             print("[ ERROR! ]: [ {} ]".format(", ".join(attributes)))
@@ -93,7 +93,7 @@ def check_fields(df, args, geo):
 
 
 ############################
-# read the input file
+# perform the file conversion
 vector, geo = read_input(args.input)
 
 # check that the fields passed as arguments are correct
