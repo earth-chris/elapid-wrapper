@@ -1,0 +1,24 @@
+name: ccb-dev
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - black
+  - flake8
+  - gdal
+  - geopandas
+  - isort
+  - matplotlib
+  - openjdk
+  - pandas
+  - pre-commit
+  - psutil
+  - pytest
+  - pytest-cov
+  - python-dotenv
+  - python=3.7.6
+  - scikit-learn
+  - scipy
+  - shapely
