@@ -1,6 +1,7 @@
 name: ccb
 
 channels:
+  - anaconda
   - conda-forge
   - defaults
 
