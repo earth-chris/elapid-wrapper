@@ -1,7 +1,6 @@
 #! /usr/bin/env python
 import argparse
 import importlib
-# hack some encoding stuff because fml
 import sys
 
 import geopandas as gpd
@@ -9,8 +8,8 @@ import numpy as np
 import pandas as pd
 from shapely.geometry import Point
 
-importlib.reload(sys)
-sys.setdefaultencoding("utf-8")
+# importlib.reload(sys)
+# sys.setdefaultencoding("utf-8")
 
 
 ############################
@@ -55,7 +54,7 @@ parser.add_argument(
     "--country", help="subset the data by country", default=None, choices=countries, nargs="+", metavar=""
 )
 
-# finall, parse the arguments
+# finally, parse the arguments
 args = parser.parse_args()
 
 
@@ -133,7 +132,7 @@ print("[ STATUS ]: Removing bad data points")
 # keep only valid records
 full = full.dropna(subset=valid_by)
 
-# drop records that are too inpercise
+# drop records that are too impercise
 if args.precision is not None:
     full = full.loc[full["coordinateUncertaintyInMeters"] <= args.precision]
 
