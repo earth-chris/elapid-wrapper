@@ -245,7 +245,7 @@ class maxent:
             try:
                 _os.makedirs(self.parameters_["model_dir"])
                 prnt.status("created output directory: {}".format(self.parameters_["model_dir"]))
-            except:
+            except TypeError:
                 flag = False
 
         if self.parameters_["bias_file"] is not None:
@@ -513,8 +513,8 @@ class maxent:
                 try:
                     if len(df[df["Test or train"] == "test"]) > 0:
                         df = df[df["Test or train"] == "test"]
-                except:
-                    prnt.error("Unable to subset test data")
+                except NameError:
+                    prnt.error("Unable to find and subset test data")
 
             # set the output array size
             nl = len(df)
