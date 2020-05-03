@@ -1,7 +1,7 @@
 """
 """
-import numpy as _np
 import matplotlib.pyplot as _plt
+import numpy as _np
 from scipy.stats import gaussian_kde as _gaussian_kde
 
 

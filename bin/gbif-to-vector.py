@@ -1,13 +1,13 @@
 #! /usr/bin/env python
 import argparse
 import importlib
-import numpy as np
-import pandas as pd
-import geopandas as gpd
-from shapely.geometry import Point
-
 # hack some encoding stuff because fml
 import sys
+
+import geopandas as gpd
+import numpy as np
+import pandas as pd
+from shapely.geometry import Point
 
 importlib.reload(sys)
 sys.setdefaultencoding("utf-8")

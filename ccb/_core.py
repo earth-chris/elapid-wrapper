@@ -1,14 +1,14 @@
 """Core functions and operations for the ccb library.
 """
+import glob as _glob
+import multiprocessing as _mp
+import numbers as _num
 import os as _os
+import subprocess as _sp
+
 import numpy as _np
 import pandas as _pd
-import glob as _glob
-import numbers as _num
-import subprocess as _sp
-import multiprocessing as _mp
 from psutil import virtual_memory as _vm
-
 
 # get info on the cpu for setting memory/thread limits
 _ncpu = _mp.cpu_count()

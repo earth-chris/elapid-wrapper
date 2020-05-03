@@ -1,11 +1,11 @@
 #! /usr/bin/env python
-import sys
 import argparse
+import sys
+
+import geopandas as gpd
 import numpy as np
 import pandas as pd
-import geopandas as gpd
 from shapely.geometry import Point
-
 
 ############################
 # set the command line argument parser
