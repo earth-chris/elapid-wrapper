@@ -15,10 +15,9 @@ def is_raster(path):
     """
     # its a dang raster if GDAL can open it
     try:
-        ref = _gdal.Open(path)
-        ref = None
+        _gdal.Open(path)
         return True
-    except:
+    except RuntimeError:
         return False
 
 
