@@ -60,10 +60,10 @@ pre-commit install
 * Jeff Smith also has keys to the car [[email][email-jrs]] [[github][github-jrs]]
 
 
-[email-cba][mailto:cbanders@stanford.edu]
-[email-jrs][mailto:jrsmith7@stanford.edu]
-[github-cba][https://github.com/earth-chris]
-[github-jrs][https://github.com/jeffreysmith-jrs]
-[home-conda][https://docs.conda.io/]
-[home-gbif][https://gbif.org]
-[home-maxent][https://biodiversityinformatics.amnh.org/open_source/maxent/]
+[email-cba]: mailto:cbanders@stanford.edu
+[email-jrs]: mailto:jrsmith7@stanford.edu
+[github-cba]: https://github.com/earth-chris
+[github-jrs]: https://github.com/jeffreysmith-jrs
+[home-conda]: https://docs.conda.io/
+[home-gbif]: https://gbif.org
+[home-maxent]: https://biodiversityinformatics.amnh.org/open_source/maxent/
