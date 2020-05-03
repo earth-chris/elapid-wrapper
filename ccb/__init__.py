@@ -1,4 +1,2 @@
+from . import metrics, plot, read
 from ._core import *
-from . import read
-from . import metrics
-from . import plot

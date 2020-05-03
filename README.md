@@ -1,26 +1,69 @@
 # CCB
-This repo contains a set of general functions for performing everyday ccb'ing
 
-Maintained by [Christopher Anderson](mailto:cbanders@stanford.edu) and [Jeff Smith](mailto:jrsmith7@stanford.edu)
+This library includes convenience functions and scripts to support species distribution modeling (SDM) efforts. This includes a python wrapper for [MaxEnt][home-maxent] and tools for translating [GBIF-][home-gbif] and MaxEnt-format datasets to traditional geospatial formats. 
 
-### building the singularity container
-Build the ccb singularity container using the `ccb-singularity.build` script.
+## Pre-requisites
 
-```
-# clone the latest version of the repo
+The easiest way is to install via [conda][home-conda]. Make sure you have `conda` installed (either via minconda (recommended) or anaconda).
+
+## Install
+
+### via conda
+
+```bash
 git clone https://github.com/stanford-ccb/ccb.git
 cd ccb/
-
-# add the path to this repo as an environment variable
-export CCB=$PWD
-echo 'export CCB=$PWD' >> ~/.bashrc
-
-# then build the singularity container into the bin directory
-sudo singularity build bin/ccb ccb-singularity.build
-
-# and add ccb/bin to your local path so you can easily access the container
-export PATH=$CCB/bin:$PATH
-echo 'export PATH=$CCB/bin:$PATH' >> ~/.bashrc
+conda env create --file=environment.yml
 ```
 
-You can add then access the binary commands though the singularity container by typing e.g. `ccb gbif-to-vector -h`. You could also access the python module through e.g. `ccb ipython` then `import ccb`.
+Once you've created the environment, activate it and install `ccb`.
+
+```bash
+conda activate ccb
+pip install -r requirements.txt
+python setup.py install
+```
+
+Then you should have a conda environment you can actiave with `conda activate ccb`. You can then e.g. run the executable `vector-to-maxent -h`, or `import ccb` in python from this environment.
+
+### non-conda install
+
+Clone the repository and create a system `ccb` install.
+
+```bash
+git clone https://github.com/stanford-ccb/ccb.git
+pip install -r requirements.txt
+python setup.py install
+```
+
+## Contributing
+
+External contribution guidelines are not formally supported at this time--reach out to the [package developers](#contact) to facilitate contributions.
+
+A separate `conda` development environment was created to facilitate contributing well-formatted code to `ccb`. Create this environment with the following command.
+
+```bash
+conda env create --file=environment-dev.yml
+```
+
+This environment contains additional code formatting libraries, including `black`, `flake8`, `isort` and `pytest`. These tools are automatically applied to all code commits via the `pre-commit` library. To install `pre-commit`, run the following command:
+
+```bash
+pre-commit install
+```
+
+`pre-commit` behavior is defined in `.pre-commit-config.yaml`, specifying how to format the code, and cleaning up any formatting issues prior to accepting any commit. This should ensure that all pull requests are well-formatted.
+
+## Contact
+
+* Christopher Anderson is the primary developer [[email][email-cba]] [[github][github-cba]]
+* Jeff Smith also has keys to the car [[email][email-jrs]] [[github][github-jrs]]
+
+
+[email-cba][mailto:cbanders@stanford.edu]
+[email-jrs][mailto:jrsmith7@stanford.edu]
+[github-cba][https://github.com/earth-chris]
+[github-jrs][https://github.com/jeffreysmith-jrs]
+[home-conda][https://docs.conda.io/]
+[home-gbif][https://gbif.org]
+[home-maxent][https://biodiversityinformatics.amnh.org/open_source/maxent/]
