@@ -460,13 +460,13 @@ class maxent:
             return None
 
         # reconcile the stupid differences in column names for prediction type
-        if prediction_type is "raw":
+        if prediction_type == "raw":
             sample_column = "Raw prediction"
             backgr_column = "raw"
-        elif prediction_type is "cumulative":
+        elif prediction_type == "cumulative":
             sample_column = "Cumulative prediction"
             backgr_column = "cumulative"
-        elif prediction_type is "logistic":
+        elif prediction_type == "logistic":
             sample_column = "Logistic prediction"
             backgr_column = "Logistic"
         else:
@@ -599,7 +599,7 @@ class maxent:
         if self.parameters_["test_samples"] is not None:
             s.append("-T")
             s.append(self.parameters_["test_samples"])
-        elif self.parameters_["pct_test_points"] is not 0:
+        elif self.parameters_["pct_test_points"] != 0:
             s.append("-X")
             s.append("{:d}".format(self.parameters_["pct_test_points"]))
 
@@ -708,11 +708,11 @@ class maxent:
                 s.append(feature)
 
         # set a bunch of feature-specific parameters
-        if not "auto" in self.parameters_["features"]:
+        if "auto" not in self.parameters_["features"]:
 
             s.append("noautofeature")
 
-            if not "linear" in self.parameters_["features"]:
+            if "linear" not in self.parameters_["features"]:
                 s.append("nolinear")
 
             if "quadratic" in self.parameters_["features"]:
