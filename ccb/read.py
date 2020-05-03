@@ -38,7 +38,7 @@ def is_csv(path):
     """
     # check file ending
     ext = _os.path.splitext(path)[1]
-    if ext.lower() in ['.csv', '.tsv']:
+    if ext.lower() in [".csv", ".tsv"]:
         return True
     else:
         return False
@@ -53,7 +53,7 @@ def pck(path):
     Returns:
         the object stored in the pickle file
     """
-    with open(path, 'r') as f:
+    with open(path, "r") as f:
         return _pickle.load(f)
 
 
@@ -183,8 +183,7 @@ class raster:
 
         # update projection and geotransform at file-level
         ref.SetProjection(self.prj)
-        ref.SetGeoTransform([self.xmin, self.xps, self.xoff,
-                             self.ymax, self.yoff, self.yps])
+        ref.SetGeoTransform([self.xmin, self.xps, self.xoff, self.ymax, self.yoff, self.yps])
 
         # update no-data value band by band
         if self.no_data is not None:
@@ -227,8 +226,8 @@ class raster:
 
         # create a new raster file with these parameters, but don't write any data
         ref = _gdal.GetDriverByName(new_obj.driver_name).Create(
-            new_obj.file_name, new_obj.nx, new_obj.ny, new_obj.nb,
-            new_obj.dt, options=options)
+            new_obj.file_name, new_obj.nx, new_obj.ny, new_obj.nb, new_obj.dt, options=options
+        )
 
         # set the projection and geotransform parameters
         new_obj.write_metadata(ref=ref)
