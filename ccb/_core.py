@@ -10,6 +10,11 @@ import numpy as _np
 import pandas as _pd
 from psutil import virtual_memory as _vm
 
+# get file paths for the maxent jar file
+_package_path = _os.path.realpath(__file__)
+_package_dir = _os.path.dirname(_package_path)
+_maxent_path = _os.path.join(_package_dir, "maxent", "maxent.jar")
+
 # get info on the cpu for setting memory/thread limits
 _ncpu = _mp.cpu_count()
 _mems = _vm().total / (1024 * 1024)
@@ -192,7 +197,7 @@ class maxent:
             "allow_partial_data": False,
             "nodata": -9999,
             "prefixes": False,
-            "path_maxent": "/ccb/maxent.jar",
+            "path_maxent": _maxent_path,
             "path_java": "java",
         }
 
