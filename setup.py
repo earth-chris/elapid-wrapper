@@ -14,7 +14,7 @@ setup_args = {
     "packages": ["ccb"],
     "include_package_data": True,
     "platforms": "any",
-    "scripts": ["bin/gbif-to-vector.py", "bin/maxent-to-vector.py"],
+    "scripts": ["bin/gbif-to-vector.py", "bin/vector-to-maxent.py"],
     "data_files": [("maxent", ["ccb/maxent/maxent.jar", "ccb/maxent/README.txt", "ccb/maxent/LICENSE.txt"])],
 }
 
