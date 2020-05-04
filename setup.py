@@ -1,10 +1,10 @@
 from setuptools import find_packages, setup
 
-__version__ = open("ccb/__version__.py").read()
+version = open("ccb/__version__.py").read().strip('"\n')
 
 setup_args = {
     "name": "ccb",
-    "version": __version__,
+    "version": version,
     "url": "https://github.com/earth-chris/ccb",
     "license": "MIT",
     "author": "Christopher Anderson",
