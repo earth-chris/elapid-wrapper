@@ -85,7 +85,7 @@ class prnt:
         if type(message) is str:
             print("[ ERROR! ]: {}".format(message))
         elif type(message) is list:
-            for item in list:
+            for item in message:
                 print("[ ERROR! ]: {}".format(item))
         elif isinstance(message, _num.Number):
             print("[ ERROR! ]: {}".format(message))
@@ -97,7 +97,7 @@ class prnt:
         if type(message) is str:
             print("[ STATUS ]: {}".format(message))
         elif type(message) is list:
-            for item in list:
+            for item in message:
                 print("[ STATUS ]: {}".format(item))
         elif isinstance(message, _num.Number):
             print("[ STATUS ]: {}".format(message))
