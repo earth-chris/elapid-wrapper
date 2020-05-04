@@ -1,0 +1,11 @@
+gdal
+geopandas
+matplotlib
+nu
+pandas
+psutil
+python==3.7.6
+scikit-learn
+scipy==1.4.1
+shapely4.1
+shapely
