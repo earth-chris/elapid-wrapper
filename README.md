@@ -26,6 +26,15 @@ python setup.py install
 
 Then you should have a conda environment you can actiave with `conda activate ccb`. You can then e.g. run the executable `vector-to-maxent -h`, or `import ccb` in python from this environment.
 
+If you're interested in using the ccb default `ipython` profile, you can set an environment variable to do this for you. From the base `ccb` directory, run the following:
+
+```bash
+conda activate ccb
+conda env config vars set IPYTHONDIR=$PWD/ipython
+```
+
+You'll have to run `conda deactivate` then `conda activate ccb` for the changes to take effect. After that you'll be able to run `ipython` with our default settings.
+
 ### non-conda install
 
 Clone the repository and create a system `ccb` install.
