@@ -24,25 +24,25 @@ class tuner(object):
         n_jobs=_ncpu,
         refit=True,
         verbose=1,
-        error_score=0,
+        error_score="raise",
         return_train_score=True,
         cv=None,
         n_splits=5,
     ):
         """Initializes a model tuning object wtih functions to optimize hyperparameter selection across multiple sklearn model types
-        :param x:
-        :param y:
-        :param optimizer:
-        :param param_grid:
-        :param scoring:
-        :param fit_params:
-        :param n_jobs:
-        :param refit:
-        :param error_score:
-        :param return_train_score:
-        :param cv:
-        :param n_splits:
-        :return tuner object: a class instance with model tuning utilities / functions
+        :param x: the model covariates
+        :param y: the response variable
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param n_jobs: number of cpus to use in parameter estimation
+        :param refit: compute and store a `best_estimator_` based on the best hyperparameter fit
+        :param error_score: the value to return whenan error occurs in fitting. set to 'raise' to raise an exception.
+        :param return_train_score: boolean to compute and save training scores. setting to false may save computation time.
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :param n_splits: number of cross-validation splits
+        :return object: a class instance with model tuning utilities / functions
         """
 
         # set the variables to the tune class
@@ -60,9 +60,12 @@ class tuner(object):
         self.cv = cv
         self.n_splits = n_splits
 
-    # function to actually run the tuning process and report outputs
+        return self
+
     def run_gs(self, estimator):
-        """
+        """Runs a grid search based on the input hyperparameter options.
+        :param estimator: the sklearn model estimator with an estimator.fit() function
+        :return None: updates the tuner object with grid search results
         """
 
         # create the grid search
@@ -93,7 +96,13 @@ class tuner(object):
         self.gs = gs
 
     def LinearRegression(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates a linear regression model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the LinearRegression estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -133,7 +142,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def LogisticRegression(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates a logistic regression model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the LogisticRegression estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -173,7 +188,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def DecisionTreeClassifier(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates a decision tree model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the DecisionTreeClassifier estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -220,7 +241,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def SVC(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None, class_weight=None):
-        """
+        """Creates a support vector machine classifier model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the SVC estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -264,7 +291,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def SVR(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates a support vector machine regression model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the SVR estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -309,7 +342,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def LinearSVC(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates a linear support vector machine classifaction model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the LinearSVC estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -354,7 +393,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def LinearSVR(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates a linear support vector machine regression model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the LinearSVR estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -401,7 +446,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def AdaBoostClassifier(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates an ADA boosted classifaction model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the AdaBoostClassifier estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -441,7 +492,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def AdaBoostRegressor(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates an ADA boosted regression model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the AdaBoostRegressor estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -485,7 +542,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def GradientBoostClassifier(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates an gradient boosted classifaction model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the GradientBoostClassifier estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -532,7 +595,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def GradientBoostRegressor(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates an gradient boosted regression model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the GradientBoostRegressor estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -581,7 +650,14 @@ class tuner(object):
     def RandomForestClassifier(
         self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None, class_weight=None
     ):
-        """
+        """Creates a random forest classification model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :param class_weight: per-class weighting factors
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the RandomForestClassifier estimator
         """
 
         # check if the optimizer has changed, otherwise use default
@@ -624,11 +700,17 @@ class tuner(object):
             self.cv = cv
 
         # create the estimator and run the grid search
-        estimator = _ensemble.RandomForestClassifier()
+        estimator = _ensemble.RandomForestClassifier(class_weight=class_weight)
         self.run_gs(estimator)
 
     def RandomForestRegressor(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None):
-        """
+        """Creates a random forest regression model estimator.
+        :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
+        :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
+        :param scoring: the model performance metric to optimize. accepts string values and sklear.metrics.* instances
+        :param fit_params: parameters to pass to the `fit` method of the estimator
+        :param cv: determines the cross-validation splitting strategy. accepts inputs to sklearn.model_selection.GridSearchCV
+        :return None: updates the `tuner` object with the passed parameters and runs a grid search using the RandomForestRegressor estimator
         """
 
         # check if the optimizer has changed, otherwise use default
