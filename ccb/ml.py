@@ -60,8 +60,6 @@ class tuner(object):
         self.cv = cv
         self.n_splits = n_splits
 
-        return self
-
     def run_gs(self, estimator):
         """Runs a grid search based on the input hyperparameter options.
         :param estimator: the sklearn model estimator with an estimator.fit() function
@@ -73,7 +71,6 @@ class tuner(object):
             estimator,
             param_grid=self.param_grid,
             scoring=self.scoring,
-            fit_params=self.fit_params,
             n_jobs=self.n_jobs,
             cv=self.cv,
             refit=self.refit,
@@ -564,7 +561,6 @@ class tuner(object):
                     "max_features": ("sqrt", "log2", None),
                     "max_depth": (1, 10, None),
                     "min_samples_split": (2, 0.01, 0.1),
-                    "min_impurity_split": (1e-7, 1e-6),
                 }
                 self.param_grid = param_grid
         else:
@@ -617,7 +613,6 @@ class tuner(object):
                     "max_features": ("sqrt", "log2", None),
                     "max_depth": (1, 10, None),
                     "min_samples_split": (2, 0.01, 0.1),
-                    "min_impurity_split": (1e-7, 1e-6),
                 }
                 self.param_grid = param_grid
         else:
@@ -638,7 +633,7 @@ class tuner(object):
         # set the cross validation strategy
         if cv is None:
             if self.cv is None:
-                cv = _model_selection.StratifiedKFold(n_splits=self.n_splits)
+                cv = _model_selection.KFold(n_splits=self.n_splits)
                 self.cv = cv
         else:
             self.cv = cv
@@ -673,7 +668,6 @@ class tuner(object):
                     "max_features": ("sqrt", "log2", None),
                     "max_depth": (1, 10, None),
                     "min_samples_split": (2, 0.01, 0.1),
-                    "min_impurity_split": (1e-7, 1e-6),
                 }
                 self.param_grid = param_grid
         else:
@@ -725,7 +719,6 @@ class tuner(object):
                     "max_features": ("sqrt", "log2", None),
                     "max_depth": (1, 10, None),
                     "min_samples_split": (2, 0.01, 0.1),
-                    "min_impurity_split": (1e-7, 1e-6),
                 }
                 self.param_grid = param_grid
         else:
@@ -746,7 +739,7 @@ class tuner(object):
         # set the cross validation strategy
         if cv is None:
             if self.cv is None:
-                cv = _model_selection.StratifiedKFold(n_splits=self.n_splits)
+                cv = _model_selection.KFold(n_splits=self.n_splits)
                 self.cv = cv
         else:
             self.cv = cv
