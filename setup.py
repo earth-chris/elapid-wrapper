@@ -1,4 +1,4 @@
-from setuptools import find_packages, setup
+from setuptools import setup
 
 version = open("ccb/__version__.py").read().strip('"\n')
 
