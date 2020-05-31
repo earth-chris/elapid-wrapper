@@ -1,18 +1,16 @@
 name: ccb
 
 channels:
-  - anaconda
   - conda-forge
-  - defaults
 
 dependencies:
+  - python=3.7.6
   - gdal
   - geopandas
   - matplotlib
   - openjdk
   - pandas
   - psutil
-  - python=3.7.6
   - scikit-learn
   - scipy
   - shapely
