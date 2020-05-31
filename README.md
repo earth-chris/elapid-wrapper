@@ -13,15 +13,14 @@ The easiest way is to install via [conda][home-conda]. Make sure you have `conda
 ```bash
 git clone https://github.com/stanford-ccb/ccb.git
 cd ccb/
-conda env create --file=environment.yml
+conda env update
 ```
 
 Once you've created the environment, activate it and install `ccb`.
 
 ```bash
 conda activate ccb
-pip install -r requirements.txt
-python setup.py install
+pip install .
 ```
 
 Then you should have a conda environment you can actiave with `conda activate ccb`. You can then e.g. run the executable `vector-to-maxent -h`, or `import ccb` in python from this environment.
@@ -30,6 +29,7 @@ If you're interested in using the ccb default `ipython` profile, you can set an 
 
 ```bash
 conda activate ccb
+conda install ipython
 conda env config vars set IPYTHONDIR=$PWD/ipython
 ```
 
@@ -41,9 +41,11 @@ Clone the repository and create a system `ccb` install.
 
 ```bash
 git clone https://github.com/stanford-ccb/ccb.git
-pip install -r requirements.txt
-python setup.py install
+cd ccb
+pip install -r requirements.txt .
 ```
+
+There are three external dependencies you'll need to setup in this pathway. First is `gdal`. Next is `open-jdk`. Last is `GEOS`, a dependency for `shapely`.
 
 ## Contributing
 
