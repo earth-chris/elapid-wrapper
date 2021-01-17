@@ -1,23 +1,25 @@
-"""Core functions and operations for the ccb library.
-"""
-import glob as _glob
-import multiprocessing as _mp
-import numbers as _num
-import os as _os
-import subprocess as _sp
+"""Utility functions for elapid."""
+import logging
+import glob
+import multiprocessing as mp
+import numbers as num
+import os
+import subprocess as sp
 
-import numpy as _np
-import pandas as _pd
-from psutil import virtual_memory as _vm
+import numpy as np
+import pandas as pd
+from psutil import virtual_memory as vm
+
+LOGGER = logging.getLogger(__name__)
 
 # get file paths for the maxent jar file
-_package_path = _os.path.realpath(__file__)
-_package_dir = _os.path.dirname(_package_path)
-_maxent_path = _os.path.join(_package_dir, "maxent", "maxent.jar")
+package_path = os.path.realpath(__file__)
+package_dir = os.path.dirname(package_path)
+maxent_path = os.path.join(package_dir, "maxent", "maxent.jar")
 
 # get info on the cpu for setting memory/thread limits
-_ncpu = _mp.cpu_count()
-_mems = _vm().total / (1024 * 1024)
+ncpu = mp.cpu_count()
+mems = vm().total / (1024 * 1024)
 
 
 # set up a function to run external commands and return stdout/stderr
@@ -25,19 +27,19 @@ def run(cmd, stderr=True):
     """"""
     # set whether or not stderr is included in return or just stdout
     if stderr:
-        se = _sp.STDOUT
+        se = sp.STDOUT
     else:
         se = None
 
     # run the command, and return stdout as a list
     try:
-        proc = _sp.check_output(cmd, shell=True, stderr=se)
+        proc = sp.check_output(cmd, shell=True, stderr=se)
 
         # return the proc string
         return proc.split(b"\n")
 
     # raise an exception and print the error if the command fails
-    except _sp.CalledProcessError as e:
+    except sp.CalledProcessError as e:
         output = e.output.strip()
         sp = output.find(b":") + 2
         print(output[sp:])
@@ -48,7 +50,7 @@ def run(cmd, stderr=True):
 def test_file(path, file_name="file"):
     """"""
     try:
-        if _os.path.isfile(path):
+        if os.path.isfile(path):
             return True
         else:
             prnt.error("{} does not exist: {}".format(file_name, path))
@@ -62,7 +64,7 @@ def test_file(path, file_name="file"):
 def test_dir(path, directory_name="directory"):
     """"""
     try:
-        if _os.path.isdir(path):
+        if os.path.isdir(path):
             return True
         else:
             prnt.error("{} does not exist: {}".format(directory_name, path))
@@ -84,7 +86,7 @@ class prnt:
         elif type(message) is list:
             for item in message:
                 print("[ ERROR! ]: {}".format(item))
-        elif isinstance(message, _num.Number):
+        elif isinstance(message, num.Number):
             print("[ ERROR! ]: {}".format(message))
         else:
             pass
@@ -96,7 +98,7 @@ class prnt:
         elif type(message) is list:
             for item in message:
                 print("[ STATUS ]: {}".format(item))
-        elif isinstance(message, _num.Number):
+        elif isinstance(message, num.Number):
             print("[ STATUS ]: {}".format(message))
         else:
             pass
@@ -120,8 +122,8 @@ class maxent:
         write_grids=False,
         logfile="maxent.log",
         cache=True,
-        n_threads=_ncpu - 1,
-        mem=_mems / 4,
+        n_threads=ncpu - 1,
+        mem=mems / 2,
     ):
         """"""
 
@@ -144,7 +146,7 @@ class maxent:
             "tau": tau,
             # set a few properties for which species and layers to map
             "species_list": None,
-            "all_species": True,
+            "allspecies": True,
             "layers_list": None,
             "layers_ignore": None,
             "layers_original": None,
@@ -164,7 +166,7 @@ class maxent:
             "write_clamp_grid": False,
             "write_mess": False,
             "beta_multiplier": 1.0,
-            "per_species_results": True,
+            "perspecies_results": True,
             "write_background_predictions": True,
             "response_curve_exponent": False,
             "add_samples_to_background": False,
@@ -180,7 +182,7 @@ class maxent:
             "maximum_iterations": 500,
             "convergence_threshold": 1e-5,
             "adjust_sample_radius": 0,
-            "n_threads": _ncpu - 1,
+            "n_threads": ncpu - 1,
             "mem": mem,
             "min_samples_threshold_product": 80,
             "min_samples_quadratic": 10,
@@ -193,7 +195,7 @@ class maxent:
             "allow_partial_data": False,
             "nodata": -9999,
             "prefixes": False,
-            "path_maxent": _maxent_path,
+            "path_maxent": maxent_path,
             "path_java": "java",
         }
 
@@ -240,7 +242,7 @@ class maxent:
 
         if not test_dir(self.parameters_["model_dir"], "model output (model_dir)"):
             try:
-                _os.makedirs(self.parameters_["model_dir"])
+                os.makedirs(self.parameters_["model_dir"])
                 prnt.status("created output directory: {}".format(self.parameters_["model_dir"]))
             except TypeError:
                 flag = False
@@ -321,17 +323,17 @@ class maxent:
     def get_layers(self):
         """"""
         # find the raw layers files
-        bil = _glob.glob("{}/*.bil".format(self.parameters_["env_layers"]))
-        asc = _glob.glob("{}/*.asc".format(self.parameters_["env_layers"]))
-        grd = _glob.glob("{}/*.grd".format(self.parameters_["env_layers"]))
-        mxe = _glob.glob("{}/*.mxe".format(self.parameters_["env_layers"]))
+        bil = glob.glob("{}/*.bil".format(self.parameters_["env_layers"]))
+        asc = glob.glob("{}/*.asc".format(self.parameters_["env_layers"]))
+        grd = glob.glob("{}/*.grd".format(self.parameters_["env_layers"]))
+        mxe = glob.glob("{}/*.mxe".format(self.parameters_["env_layers"]))
         files = bil + asc + grd + mxe
 
         # get the base name for each file
-        base = [_os.path.basename(f) for f in files]
+        base = [os.path.basename(f) for f in files]
 
         # then strip the extension and return the list of layer names
-        layers = [(_os.path.splitext(b))[0] for b in base]
+        layers = [(os.path.splitext(b))[0] for b in base]
         layers.sort()
         return layers
 
@@ -400,7 +402,7 @@ class maxent:
         # set the layers we plan to use
         self.parameters_["categorical_list"] = output_layers
 
-    def get_species(self):
+    def getspecies(self):
         """"""
         # check that the input file exists
         if not test_file(self.parameters_["samples"], "samples file"):
@@ -408,7 +410,7 @@ class maxent:
             return None
 
         # pull the unique species ids from the csv file
-        df = _pd.read_csv(self.parameters_["samples"])
+        df = pd.read_csv(self.parameters_["samples"])
         sp_list = (df["species"].unique()).tolist()
         sp_list.sort()
 
@@ -416,10 +418,10 @@ class maxent:
         # self.parameters_['species_list'] = sp_list
         return sp_list
 
-    def set_species(self, species):
+    def setspecies(self, species):
         """"""
         # first get the full species list
-        sp_list = self.get_species()
+        sp_list = self.getspecies()
 
         # if a string is passed, convert it to a list so it is compatible with other iterables
         if type(species) is str:
@@ -438,13 +440,13 @@ class maxent:
         if sp_flag:
             prnt.error("Available species include: {}".format(", ".join(sp_list)))
         else:
-            self.parameters_["all_species"] = False
+            self.parameters_["allspecies"] = False
             self.parameters_["species_list"] = sp_set
 
     def get_predictions(self, species, prediction_type="raw", test=False):
         """"""
         # check that the species passed is in the available list of species
-        sp_list = self.get_species()
+        sp_list = self.getspecies()
         if species not in sp_list:
             prnt.error("Unable to get predictions for species: {}".format(species))
             prnt.error("Available species include: {}".format(", ".join(sp_list)))
@@ -491,10 +493,10 @@ class maxent:
 
         # otherwise, read the data that do exist
         if sample_exists:
-            df = _pd.read_csv(sample_path)
+            df = pd.read_csv(sample_path)
 
             # remove nodata values
-            good_vals = _np.invert(df[sample_column].isnull())
+            good_vals = np.invert(df[sample_column].isnull())
             df = df[good_vals]
 
             # subset the test data if set
@@ -510,24 +512,24 @@ class maxent:
             nl = len(df)
 
             # then get arrays for the sample predictions
-            y_true = _np.ones(nl)
-            y_pred = _np.array(df[sample_column])
+            y_true = np.ones(nl)
+            y_pred = np.array(df[sample_column])
 
         if backgr_exists:
-            df = _pd.read_csv(backgr_path)
+            df = pd.read_csv(backgr_path)
 
             # remoe nodata values
-            good_vals = _np.invert(df[backgr_column].isnull())
+            good_vals = np.invert(df[backgr_column].isnull())
             df = df[good_vals]
             nl = len(df)
 
             # append these to the existing arrays if sample predictions already exist
             if sample_exists:
-                y_true = _np.append(y_true, _np.zeros(nl))
-                y_pred = _np.append(y_pred, _np.array(df[backgr_column]))
+                y_true = np.append(y_true, np.zeros(nl))
+                y_pred = np.append(y_pred, np.array(df[backgr_column]))
             else:
-                y_true = _np.zeros(nl)
-                y_pred = _np.array(df[backgr_column])
+                y_true = np.zeros(nl)
+                y_pred = np.array(df[backgr_column])
 
         return [y_true, y_pred]
 
@@ -575,7 +577,7 @@ class maxent:
         s.append(self.parameters_["samples"])
 
         # call out which species will be mapped if not all
-        if not self.parameters_["all_species"]:
+        if not self.parameters_["allspecies"]:
             for sp in self.parameters_["species_list"]:
                 s.append("-E")
                 split = sp.split()
@@ -658,7 +660,7 @@ class maxent:
         if not self.parameters_["write_mess"]:
             s.append("nowritemess")
 
-        if self.parameters_["per_species_results"]:
+        if self.parameters_["perspecies_results"]:
             s.append("perspeciesresults")
 
         if self.parameters_["write_background_predictions"]:
