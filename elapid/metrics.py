@@ -54,6 +54,6 @@ def f1_score(y_true, y_pred):
     return 2 * ((prec * rec) / (prec + rec))
 
 
-def roc_auc(y_true, y_pred):
+def auc(y_true, y_pred):
     """"""
     return _metrics.roc_auc_score(y_true, y_pred)
