@@ -1,6 +1,6 @@
 # elapid
 
-<img src="http://earth-chris.github.io/images/design/amazon.jpg", alt="the amazon">
+<img src="http://earth-chris.github.io/images/design/amazon.jpg", alt="the amazon"/>
 
 Convenience functions and scripts for species distribution modeling (SDM)  in python. This includes a [MaxEnt][home-maxent] wrapper and tools for working with [GBIF-][home-gbif] and MaxEnt-format datasets.
 
