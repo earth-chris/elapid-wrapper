@@ -1,17 +1,30 @@
-name: ccb
+name: elapid
 
 channels:
   - conda-forge
+  - defaults
 
 dependencies:
   - python=3.7.6
+  - black
+  - descartes
+  - flake8
   - gdal
   - geopandas
+  - ipython
+  - isort
   - matplotlib
   - openjdk
   - pandas
+  - pre-commit
   - psutil
+  - pytest
+  - pytest-cov
+  - python-dotenv
   - rtree
   - scikit-learn
   - scipy
   - shapely
+  - pip
+  - pip:
+    - requirements.txt .
