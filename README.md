@@ -68,12 +68,13 @@ pre-commit install
 
 ## Contact
 
-* Christopher Anderson is the primary developer [[email][email-cba]] [[github][github-cba]].
+* Christopher Anderson is the primary developer [[web][home-cba]] [[email][email-cba]] [[github][github-cba]].
 
 
 [email-cba]: mailto:cbanders@stanford.edu
 [github-cba]: https://github.com/earth-chris
 [github-jrs]: https://github.com/jeffreysmith-jrs
+[home-cba]: https://earth-chris.github.io
 [home-conda]: https://docs.conda.io/
 [home-gbif]: https://gbif.org
 [home-maxent]: https://biodiversityinformatics.amnh.org/open_source/maxent/
