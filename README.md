@@ -1,14 +1,12 @@
-# Elapid
+# elapid
 
-This library includes convenience functions and scripts to support species distribution modeling (SDM) efforts. This includes a python wrapper for [MaxEnt][home-maxent] and tools for translating [GBIF-][home-gbif] and MaxEnt-format datasets to traditional geospatial formats.
+Convenience functions and scripts for species distribution modeling (SDM)  in python. This includes a [MaxEnt][home-maxent] wrapper and tools for working with [GBIF-][home-gbif] and MaxEnt-format datasets.
 
-The name `elapid` was chosen as homage to Nix, H.A. (1986) *A Biogeographic Analysis of Australian Elapid Snakes*, the paper widely credited with defining the essential bioclimatic variables used in species distribution modeling. It's also a play on this software being a `python` wrapper for species distribution modeling tools.
+The name was chosen as homage to the paper by H.A. Nix, *A Biogeographic Analysis of Australian Elapid Snakes* (1986), which is widely credited with defining the essential bioclimatic variables to use in species distribution modeling. It's also a snake pun (a `python` wrapper for mapping snake biogeography).
 
 ## Dependencies
 
-The source repository contains a conda environment with all the required packages for running this software.
-
-If you want to install it on your own machine, there are three external dependencies you'll need to setup.
+The source repository contains a conda environment with the packages required to run this software. If you want to install it on your own machine, there are three external dependencies you'll need to setup.
 
 - `gdal`
 - `openjdk`
@@ -26,7 +24,7 @@ It can also be installed install via [conda][home-conda].
 conda install openjdk
 ```
 
-## Install
+## Installation
 
 `pip install elapid` should do the trick.
 
