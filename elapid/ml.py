@@ -12,7 +12,7 @@ from sklearn import tree as _tree
 _ncpu = _mp.cpu_count()
 
 
-class tuner(object):
+class sk_tuner(object):
     def __init__(
         self,
         x,
@@ -29,7 +29,7 @@ class tuner(object):
         cv=None,
         n_splits=5,
     ):
-        """Initializes a model tuning object wtih functions to optimize hyperparameter selection across multiple sklearn model types
+        """Initializes an sklearn model tuning object wtih functions to optimize hyperparameter selection across multiple sklearn model types
         :param x: the model covariates
         :param y: the response variable
         :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
