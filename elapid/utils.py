@@ -41,8 +41,8 @@ def run(cmd, stderr=True):
     # raise an exception and print the error if the command fails
     except sp.CalledProcessError as e:
         output = e.output.strip()
-        sp = output.find(b":") + 2
-        print(output[sp:])
+        sub_pos = output.find(b":") + 2
+        LOGGER.warning(output[sub_pos:])
         return e.output.strip().split(b"\n")
 
 
@@ -72,36 +72,6 @@ def test_dir(path, directory_name="directory"):
     except TypeError:
         LOGGER.warning("incorrect {} path type set".format(directory_name))
         return False
-
-
-# set up a class to consistently print status/errors
-class prnt:
-    def __init__(self):
-        pass
-
-    @staticmethod
-    def error(message):
-        if type(message) is str:
-            print("[ ERROR! ]: {}".format(message))
-        elif type(message) is list:
-            for item in message:
-                print("[ ERROR! ]: {}".format(item))
-        elif isinstance(message, num.Number):
-            print("[ ERROR! ]: {}".format(message))
-        else:
-            pass
-
-    @staticmethod
-    def status(message):
-        if type(message) is str:
-            print("[ STATUS ]: {}".format(message))
-        elif type(message) is list:
-            for item in message:
-                print("[ STATUS ]: {}".format(item))
-        elif isinstance(message, num.Number):
-            print("[ STATUS ]: {}".format(message))
-        else:
-            pass
 
 
 class maxent:
@@ -430,11 +400,11 @@ class maxent:
         # then check that the species passed are in the available list of species
         sp_flag = False
         sp_set = []
-        for sp in species:
-            if sp not in sp_list:
-                LOGGER.warning("Unable to set species: {}".format(sp))
+        for spec in species:
+            if spec not in sp_list:
+                LOGGER.warning("Unable to set species: {}".format(spec))
             else:
-                sp_set.append(sp)
+                sp_set.append(spec)
 
         # return the list of available species if any were incorrectly set, otherwise update the params list
         if sp_flag:
@@ -578,9 +548,9 @@ class maxent:
 
         # call out which species will be mapped if not all
         if not self.parameters_["allspecies"]:
-            for sp in self.parameters_["species_list"]:
+            for spec in self.parameters_["species_list"]:
                 s.append("-E")
-                split = sp.split()
+                split = spec.split()
                 s.append(sp_join.join(split))
 
         # set the output directory
