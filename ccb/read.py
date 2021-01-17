@@ -202,7 +202,12 @@ class raster(object):
 
         # create a new raster file with these parameters, but don't write any data
         ref = _gdal.GetDriverByName(new_obj.driver_name).Create(
-            new_obj.file_name, new_obj.nx, new_obj.ny, new_obj.nb, new_obj.dt, options=options
+            new_obj.file_name,
+            new_obj.nx,
+            new_obj.ny,
+            new_obj.nb,
+            new_obj.dt,
+            options=options,
         )
 
         # set the projection and geotransform parameters

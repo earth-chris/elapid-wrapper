@@ -34,7 +34,12 @@ parser.add_argument("-i", "--input", help="path to GBIF CSV file", type=str, req
 parser.add_argument("-o", "--output", help="path to the output vector", type=str, required=True)
 
 # now various flags and arguments
-parser.add_argument("-e", "--epsg", help="the output projection (in gdal-readable format)", default="4326")
+parser.add_argument(
+    "-e",
+    "--epsg",
+    help="the output projection (in gdal-readable format)",
+    default="4326",
+)
 parser.add_argument(
     "-t",
     "--taxonomic_level",
@@ -43,15 +48,30 @@ parser.add_argument(
     choices=taxa,
     metavar="taxonomic_level",
 )
-parser.add_argument("-p", "--precision", help="the minimum allowable spatial precision (in meters)", default=None)
+parser.add_argument(
+    "-p",
+    "--precision",
+    help="the minimum allowable spatial precision (in meters)",
+    default=None,
+)
 parser.add_argument("-y", "--min_year", help="the earliest year to grab data from", default=2000)
 
 # allow subsetting by country or continent
 parser.add_argument(
-    "--continent", help="subset the data by continent", default=None, choices=continents, nargs="+", metavar=""
+    "--continent",
+    help="subset the data by continent",
+    default=None,
+    choices=continents,
+    nargs="+",
+    metavar="",
 )
 parser.add_argument(
-    "--country", help="subset the data by country", default=None, choices=countries, nargs="+", metavar=""
+    "--country",
+    help="subset the data by country",
+    default=None,
+    choices=countries,
+    nargs="+",
+    metavar="",
 )
 
 # finally, parse the arguments
@@ -109,7 +129,16 @@ valid_by = [args.taxonomic_level, "decimalLatitude", "decimalLongitude"]
 duplicate_by = ["species", "genus", "decimalLatitude", "decimalLongitude"]
 
 # set the columns worth keeping
-final_columns = ["kingdom", "phylum", "class", "order", "family", "genus", "species", "year"]
+final_columns = [
+    "kingdom",
+    "phylum",
+    "class",
+    "order",
+    "family",
+    "genus",
+    "species",
+    "year",
+]
 
 
 ############################
@@ -118,7 +147,14 @@ print("[ STATUS ]: Starting gbif-to-vector")
 print("[ STATUS ]: Reading input file: {}".format(args.input))
 
 # read the data into memory and subset to just the relevant columns
-full = pd.read_csv(args.input, header=0, sep="\t", usecols=col_names, dtype=col_types, error_bad_lines=False)
+full = pd.read_csv(
+    args.input,
+    header=0,
+    sep="\t",
+    usecols=col_names,
+    dtype=col_types,
+    error_bad_lines=False,
+)
 
 # then convert the numberic data types from strings
 full["decimalLatitude"] = pd.to_numeric(full["decimalLatitude"], errors="coerce")

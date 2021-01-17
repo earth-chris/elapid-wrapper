@@ -16,7 +16,13 @@ parser.add_argument("-i", "--input", help="path to vector file", type=str, requi
 parser.add_argument("-o", "--output", help="path to the output csv", type=str, required=True)
 
 # set the attribute field to identify the species
-parser.add_argument("-f", "--field", help="the attribute field to set as the species", type=str, default="species")
+parser.add_argument(
+    "-f",
+    "--field",
+    help="the attribute field to set as the species",
+    type=str,
+    default="species",
+)
 
 # allow user to set an attribute field as the x/y data
 parser.add_argument("--xfield", help="use a certain attribute field as the Y data", default=None)

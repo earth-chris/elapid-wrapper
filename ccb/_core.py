@@ -22,8 +22,7 @@ _mems = _vm().total / (1024 * 1024)
 
 # set up a function to run external commands and return stdout/stderr
 def run(cmd, stderr=True):
-    """
-    """
+    """"""
     # set whether or not stderr is included in return or just stdout
     if stderr:
         se = _sp.STDOUT
@@ -47,8 +46,7 @@ def run(cmd, stderr=True):
 
 # test whether a file exists
 def test_file(path, file_name="file"):
-    """
-    """
+    """"""
     try:
         if _os.path.isfile(path):
             return True
@@ -62,8 +60,7 @@ def test_file(path, file_name="file"):
 
 # test whether a directory exists
 def test_dir(path, directory_name="directory"):
-    """
-    """
+    """"""
     try:
         if _os.path.isdir(path):
             return True
@@ -126,8 +123,7 @@ class maxent:
         n_threads=_ncpu - 1,
         mem=_mems / 4,
     ):
-        """
-        """
+        """"""
 
         # assign the passed values to a parameters dictionary
         self.parameters_ = {
@@ -205,22 +201,19 @@ class maxent:
         self.initialized_ = False
 
     def set_parameters(self, **kwargs):
-        """
-        """
+        """"""
         keys = kwargs.keys()
         for param in keys:
             self.parameters_[param] = kwargs[param]
 
     def get_keys(self):
-        """
-        """
+        """"""
         keys = list(self.parameters_.keys())
         keys.sort()
         return keys
 
     def get_parameters(self, *args):
-        """
-        """
+        """"""
         params = {}
         for item in args:
             params[item] = self.parameters_[item]
@@ -228,8 +221,7 @@ class maxent:
         return params
 
     def initialize(self, **kwargs):
-        """
-        """
+        """"""
         # get ready for just so, so many if statements.
 
         # set a flag to track progress on whether the settings are correct
@@ -267,7 +259,14 @@ class maxent:
 
         # check correct formatting for several options
         # set options for the features to use
-        features_types = ["linear", "quadratic", "product", "threshold", "hinge", "auto"]
+        features_types = [
+            "linear",
+            "quadratic",
+            "product",
+            "threshold",
+            "hinge",
+            "auto",
+        ]
         features_default = ["hinge"]
         for feature in self.parameters_["features"]:
             if feature.lower() not in features_types:
@@ -320,8 +319,7 @@ class maxent:
         return flag
 
     def get_layers(self):
-        """
-        """
+        """"""
         # find the raw layers files
         bil = _glob.glob("{}/*.bil".format(self.parameters_["env_layers"]))
         asc = _glob.glob("{}/*.asc".format(self.parameters_["env_layers"]))
@@ -338,8 +336,7 @@ class maxent:
         return layers
 
     def set_layers(self, layers):
-        """
-        """
+        """"""
         # check initialized to ensure a directory is set
         if not self.initialized_:
             if not self.initialize():
@@ -373,8 +370,7 @@ class maxent:
         self.parameters_["layers_ignore"] = list(set(self.parameters_["layers_original"]) - set(output_layers))
 
     def set_categorical(self, layers):
-        """
-        """
+        """"""
         # check initialized to ensure a directory is set
         if not self.initialized_:
             if not self.initialize():
@@ -405,8 +401,7 @@ class maxent:
         self.parameters_["categorical_list"] = output_layers
 
     def get_species(self):
-        """
-        """
+        """"""
         # check that the input file exists
         if not test_file(self.parameters_["samples"], "samples file"):
             prnt.error("unable to get species list")
@@ -422,8 +417,7 @@ class maxent:
         return sp_list
 
     def set_species(self, species):
-        """
-        """
+        """"""
         # first get the full species list
         sp_list = self.get_species()
 
@@ -448,8 +442,7 @@ class maxent:
             self.parameters_["species_list"] = sp_set
 
     def get_predictions(self, species, prediction_type="raw", test=False):
-        """
-        """
+        """"""
         # check that the species passed is in the available list of species
         sp_list = self.get_species()
         if species not in sp_list:
@@ -539,8 +532,7 @@ class maxent:
         return [y_true, y_pred]
 
     def build_cmd(self):
-        """
-        """
+        """"""
         # first, check whether the options have been parsed through the initializer
         if not self.initialize():
             prnt.error("unable to build cmd string. update your parameters then re-run object.initialize()")
@@ -762,8 +754,7 @@ class maxent:
         return join.join(s)
 
     def fit(self):
-        """
-        """
+        """"""
         # fist build the string to create the output command
         cmd = self.build_cmd()
 

@@ -6,8 +6,7 @@ from sklearn import metrics as _metrics
 
 # a series of metrics for binary classification that accept categorical or continuous data
 def binary_classes(y_true, y_pred):
-    """
-    """
+    """"""
     n_ind = y_true == 0
     p_ind = y_true == 1
 
@@ -25,42 +24,36 @@ def binary_classes(y_true, y_pred):
 
 
 def accuracy(y_true, y_pred):
-    """
-    """
+    """"""
     tp, tn, fp, fn = binary_classes(y_true, y_pred)
     return (tp + tn) / (tp + tn + fp + fn)
 
 
 def specificity(y_true, y_pred):
-    """
-    """
+    """"""
     tp, tn, fp, fn = binary_classes(y_true, y_pred)
     return tn / (tn + fp)
 
 
 def precision(y_true, y_pred):
-    """
-    """
+    """"""
     tp, tn, fp, fn = binary_classes(y_true, y_pred)
     return tp / (tp + fp)
 
 
 def recall(y_true, y_pred):
-    """
-    """
+    """"""
     tp, tn, fp, fn = binary_classes(y_true, y_pred)
     return tp / (tp + fn)
 
 
 def f1_score(y_true, y_pred):
-    """
-    """
+    """"""
     rec = recall(y_true, y_pred)
     prec = precision(y_true, y_pred)
     return 2 * ((prec * rec) / (prec + rec))
 
 
 def roc_auc(y_true, y_pred):
-    """
-    """
+    """"""
     return _metrics.roc_auc_score(y_true, y_pred)

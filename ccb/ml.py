@@ -109,7 +109,10 @@ class tuner(object):
         # check if the parameter grid has been set, otherwise set defaults
         if param_grid is None:
             if self.param_grid is None:
-                param_grid = {"normalize": (True, False), "fit_intercept": (True, False)}
+                param_grid = {
+                    "normalize": (True, False),
+                    "fit_intercept": (True, False),
+                }
                 self.param_grid = param_grid
         else:
             self.param_grid = param_grid
@@ -155,7 +158,11 @@ class tuner(object):
         # check if the parameter grid has been set, otherwise set defaults
         if param_grid is None:
             if self.param_grid is None:
-                param_grid = {"C": (1e-2, 1e-1, 1e0, 1e1), "tol": (1e-3, 1e-4, 1e-5), "fit_intercept": (True, False)}
+                param_grid = {
+                    "C": (1e-2, 1e-1, 1e0, 1e1),
+                    "tol": (1e-3, 1e-4, 1e-5),
+                    "fit_intercept": (True, False),
+                }
                 self.param_grid = param_grid
         else:
             self.param_grid = param_grid
@@ -237,7 +244,15 @@ class tuner(object):
         estimator = _tree.DecisionTreeClassifier()
         self.run_gs(estimator)
 
-    def SVC(self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None, class_weight=None):
+    def SVC(
+        self,
+        optimizer=None,
+        param_grid=None,
+        scoring=None,
+        fit_params=None,
+        cv=None,
+        class_weight=None,
+    ):
         """Creates a support vector machine classifier model estimator.
         :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
         :param param_grid: dictionary with hyperparameter names as keys and lists of hyperparameter settings to try in grid search
@@ -459,7 +474,10 @@ class tuner(object):
         # check if the parameter grid has been set, otherwise set defaults
         if param_grid is None:
             if self.param_grid is None:
-                param_grid = {"n_estimators": (25, 50, 75, 100), "learning_rate": (0.1, 0.5, 1.0)}
+                param_grid = {
+                    "n_estimators": (25, 50, 75, 100),
+                    "learning_rate": (0.1, 0.5, 1.0),
+                }
                 self.param_grid = param_grid
         else:
             self.param_grid = param_grid
@@ -643,7 +661,13 @@ class tuner(object):
         self.run_gs(estimator)
 
     def RandomForestClassifier(
-        self, optimizer=None, param_grid=None, scoring=None, fit_params=None, cv=None, class_weight=None
+        self,
+        optimizer=None,
+        param_grid=None,
+        scoring=None,
+        fit_params=None,
+        cv=None,
+        class_weight=None,
     ):
         """Creates a random forest classification model estimator.
         :param optimizer: the parameter search and optimization method. default is a sklearn.model_selection.GridSearchCV instance
