@@ -53,10 +53,10 @@ def test_file(path, file_name="file"):
         if os.path.isfile(path):
             return True
         else:
-            prnt.error("{} does not exist: {}".format(file_name, path))
+            LOGGER.warning("{} does not exist: {}".format(file_name, path))
             return False
     except TypeError:
-        prnt.error("incorrect {} path type set".format(file_name))
+        LOGGER.warning("incorrect {} path type set".format(file_name))
         return False
 
 
@@ -67,10 +67,10 @@ def test_dir(path, directory_name="directory"):
         if os.path.isdir(path):
             return True
         else:
-            prnt.error("{} does not exist: {}".format(directory_name, path))
+            LOGGER.warning("{} does not exist: {}".format(directory_name, path))
             return False
     except TypeError:
-        prnt.error("incorrect {} path type set".format(directory_name))
+        LOGGER.warning("incorrect {} path type set".format(directory_name))
         return False
 
 
@@ -243,7 +243,7 @@ class maxent:
         if not test_dir(self.parameters_["model_dir"], "model output (model_dir)"):
             try:
                 os.makedirs(self.parameters_["model_dir"])
-                prnt.status("created output directory: {}".format(self.parameters_["model_dir"]))
+                LOGGER.info("created output directory: {}".format(self.parameters_["model_dir"]))
             except TypeError:
                 flag = False
 
@@ -272,18 +272,18 @@ class maxent:
         features_default = ["hinge"]
         for feature in self.parameters_["features"]:
             if feature.lower() not in features_types:
-                prnt.error("incorrect feature specified: {}".format(", ".join(feature)))
-                prnt.error("  must be one of: {}".format(", ".join(features_types)))
-                prnt.error("  using default: {}".format(", ".join(features_default)))
+                LOGGER.warning("incorrect feature specified: {}".format(", ".join(feature)))
+                LOGGER.warning("  must be one of: {}".format(", ".join(features_types)))
+                LOGGER.warning("  using default: {}".format(", ".join(features_default)))
                 continue
 
         # set how replicates are handled
         replicate_types = ["crossvalidate", "bootstrap", "subsample"]
         replicate_types_default = "crossvalidate"
         if self.parameters_["replicate_type"].lower() not in replicate_types:
-            prnt.error("incorrect replicate type specified: {}".format(replicate_types))
-            prnt.error("  must be one of: {}".format(", ".join(replicate_types)))
-            prnt.error("  using default: {}".format(replicate_types_default))
+            LOGGER.warning("incorrect replicate type specified: {}".format(replicate_types))
+            LOGGER.warning("  must be one of: {}".format(", ".join(replicate_types)))
+            LOGGER.warning("  using default: {}".format(replicate_types_default))
             self.parameters_["replicate_type"] = replicate_types_default
 
         # set test percentage to an integer if a float is passed
@@ -292,18 +292,18 @@ class maxent:
             self.parameters_["pct_test_points"] = int(100 * self.parameters_["pct_test_points"])
         else:
             if type(self.parameters_["pct_test_points"]) is not int:
-                prnt.error("incorrect test percent specified: {}".format(self.parameters_["pct_test_points"]))
-                prnt.error("  must be an integer between 0-100")
-                prnt.error("  using default: {}".format(test_pct_default))
+                LOGGER.warning("incorrect test percent specified: {}".format(self.parameters_["pct_test_points"]))
+                LOGGER.warning("  must be an integer between 0-100")
+                LOGGER.warning("  using default: {}".format(test_pct_default))
                 self.parameters_["pct_test_points"] = test_pct_default
 
         # set the format for output data reporting
         formats = ["cloglog", "logistic", "cumulative", "raw"]
         formats_default = "logistic"
         if self.parameters_["output_format"].lower() not in formats:
-            prnt.error("incorrect output format specified: {}".format(self.parameters_["output_format"]))
-            prnt.error("  must be one of: {}".format(", ".join(formats)))
-            prnt.error("  using default: {}".format(formats_default))
+            LOGGER.warning("incorrect output format specified: {}".format(self.parameters_["output_format"]))
+            LOGGER.warning("  must be one of: {}".format(", ".join(formats)))
+            LOGGER.warning("  using default: {}".format(formats_default))
             self.outformat = formats_default
 
         # set the output file type if writing output files
@@ -311,9 +311,9 @@ class maxent:
             types = ["asc", "bil", "grd", "mxe"]
             types_default = "bil"
             if self.parameters_["output_type"] not in types:
-                prnt.error("incorrect output data type specified: {}".format(self.parameters_["output_type"]))
-                prnt.error("  must be one of: {}".format(", ".join(types)))
-                prnt.error("  using default: {}".format(types_default))
+                LOGGER.warning("incorrect output data type specified: {}".format(self.parameters_["output_type"]))
+                LOGGER.warning("  must be one of: {}".format(", ".join(types)))
+                LOGGER.warning("  using default: {}".format(types_default))
                 self.outtype = types_default
 
         # then update with the flag - should be true if no problems arose
@@ -342,7 +342,7 @@ class maxent:
         # check initialized to ensure a directory is set
         if not self.initialized_:
             if not self.initialize():
-                prnt.error("cannot set layers - fix obj.initialize() errors first")
+                LOGGER.warning("cannot set layers - fix obj.initialize() errors first")
                 return False
 
         # if a single layers is passed as a string, convert it to a list to support iteration
@@ -359,7 +359,7 @@ class maxent:
                 if lyr in self.parameters_["layers_original"]:
                     output_layers.append(lyr)
                 else:
-                    prnt.error("invalid layer set: {}".format(lyr))
+                    LOGGER.warning("invalid layer set: {}".format(lyr))
 
             # if its an integer, use it as an index
             if type(lyr) is int:
@@ -376,7 +376,7 @@ class maxent:
         # check initialized to ensure a directory is set
         if not self.initialized_:
             if not self.initialize():
-                prnt.error("cannot set layers - fix obj.initialize() errors first")
+                LOGGER.warning("cannot set layers - fix obj.initialize() errors first")
                 return False
 
         # if a single layers is passed as a string, convert it to a list to support iteration
@@ -393,7 +393,7 @@ class maxent:
                 if lyr in self.parameters_["layers_original"]:
                     output_layers.append(lyr)
                 else:
-                    prnt.error("invalid layer set: {}".format(lyr))
+                    LOGGER.warning("invalid layer set: {}".format(lyr))
 
             # if its an integer, use it as an index
             if type(lyr) is int:
@@ -406,7 +406,7 @@ class maxent:
         """"""
         # check that the input file exists
         if not test_file(self.parameters_["samples"], "samples file"):
-            prnt.error("unable to get species list")
+            LOGGER.warning("unable to get species list")
             return None
 
         # pull the unique species ids from the csv file
@@ -432,13 +432,13 @@ class maxent:
         sp_set = []
         for sp in species:
             if sp not in sp_list:
-                prnt.error("Unable to set species: {}".format(sp))
+                LOGGER.warning("Unable to set species: {}".format(sp))
             else:
                 sp_set.append(sp)
 
         # return the list of available species if any were incorrectly set, otherwise update the params list
         if sp_flag:
-            prnt.error("Available species include: {}".format(", ".join(sp_list)))
+            LOGGER.warning("Available species include: {}".format(", ".join(sp_list)))
         else:
             self.parameters_["allspecies"] = False
             self.parameters_["species_list"] = sp_set
@@ -448,15 +448,15 @@ class maxent:
         # check that the species passed is in the available list of species
         sp_list = self.getspecies()
         if species not in sp_list:
-            prnt.error("Unable to get predictions for species: {}".format(species))
-            prnt.error("Available species include: {}".format(", ".join(sp_list)))
+            LOGGER.warning("Unable to get predictions for species: {}".format(species))
+            LOGGER.warning("Available species include: {}".format(", ".join(sp_list)))
             return None
 
         # check that the type of prediction passed is valid
         pred_list = ["cloglog", "logistic", "cumulative", "raw"]
         if prediction_type not in pred_list:
-            prnt.error("Prediction type not supported: {}".format(prediction_type))
-            prnt.error("Available options include: {}".format(", ".join(pred_list)))
+            LOGGER.warning("Prediction type not supported: {}".format(prediction_type))
+            LOGGER.warning("Available options include: {}".format(", ".join(pred_list)))
             return None
 
         # reconcile the stupid differences in column names for prediction type
@@ -488,7 +488,7 @@ class maxent:
 
         # if neither of them are there, don't return shit
         if not (sample_exists or backgr_exists):
-            prnt.error("Unable to get predictions")
+            LOGGER.warning("Unable to get predictions")
             return None
 
         # otherwise, read the data that do exist
@@ -506,7 +506,7 @@ class maxent:
                     if len(df[df["Test or train"] == "test"]) > 0:
                         df = df[df["Test or train"] == "test"]
                 except NameError:
-                    prnt.error("Unable to find and subset test data")
+                    LOGGER.warning("Unable to find and subset test data")
 
             # set the output array size
             nl = len(df)
@@ -537,7 +537,7 @@ class maxent:
         """"""
         # first, check whether the options have been parsed through the initializer
         if not self.initialize():
-            prnt.error("unable to build cmd string. update your parameters then re-run object.initialize()")
+            LOGGER.warning("unable to build cmd string. update your parameters then re-run .initialize()")
             return False
 
         # then get ready for just a stupid number of if statements
@@ -762,9 +762,9 @@ class maxent:
 
         # then run the dang thing
         if type(cmd) is str:
-            prnt.status("starting maxent run")
-            prnt.status("  samples: {}".format(self.parameters_["samples"]))
-            prnt.status("  outputs: {}".format(self.parameters_["model_dir"]))
+            LOGGER.info("starting maxent run")
+            LOGGER.info("samples: {}".format(self.parameters_["samples"]))
+            LOGGER.info("outputs: {}".format(self.parameters_["model_dir"]))
 
             run(cmd)
 
