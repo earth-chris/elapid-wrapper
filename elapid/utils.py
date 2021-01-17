@@ -1,6 +1,6 @@
 """Utility functions for elapid."""
-import logging
 import glob
+import logging
 import multiprocessing as mp
 import numbers as num
 import os
