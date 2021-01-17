@@ -48,6 +48,12 @@ conda env config vars set IPYTHONDIR=$PWD/ipython
 
 You'll have to run `conda deactivate` then `conda activate elapid` for the changes to take effect. After that you'll be able to run `ipython` with our default settings.
 
+## License
+
+The Maxent software is bundled and served with this package, and is available under an MIT license. You can read more about the Maxent software [here][home-maxent].
+
+This source code is likewise available under MIT license.
+
 ## Contributing
 
 External contribution guidelines are not formally supported at this time--reach out to the [package developers](#contact) to facilitate contributions.
@@ -66,7 +72,6 @@ pre-commit install
 
 
 [email-cba]: mailto:cbanders@stanford.edu
-[email-jrs]: mailto:jrsmith7@stanford.edu
 [github-cba]: https://github.com/earth-chris
 [github-jrs]: https://github.com/jeffreysmith-jrs
 [home-conda]: https://docs.conda.io/
